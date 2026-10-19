@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { DataTable } from '@/components/ui/DataTable';
 import { Modal } from '@/components/ui/Modal';
-import { Input, Select } from '@/components/ui/Input';
+import { Input, Select, Textarea } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 import {
@@ -53,6 +53,11 @@ export default function UnlistedSharesPage() {
     peRatio: '',
     marketCapCr: '',
     status: 'draft' as 'draft' | 'published',
+    description: '',
+    isin: '',
+    cin: '',
+    pan: '',
+    drhpStatus: '',
   });
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -90,6 +95,11 @@ export default function UnlistedSharesPage() {
       peRatio: '',
       marketCapCr: '',
       status: 'draft',
+      description: '',
+      isin: '',
+      cin: '',
+      pan: '',
+      drhpStatus: '',
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -97,6 +107,7 @@ export default function UnlistedSharesPage() {
 
   const handleOpenEdit = (share: UnlistedShare) => {
     setEditingShare(share);
+    const details = (share.details || {}) as Record<string, unknown>;
     setFormData({
       name: share.name,
       symbol: share.symbol,
@@ -111,6 +122,11 @@ export default function UnlistedSharesPage() {
       peRatio: share.peRatio !== undefined ? String(share.peRatio) : '',
       marketCapCr: share.marketCapCr !== undefined ? String(share.marketCapCr) : '',
       status: share.status,
+      description: typeof details.description === 'string' ? details.description : '',
+      isin: typeof details.isin === 'string' ? details.isin : '',
+      cin: typeof details.cin === 'string' ? details.cin : '',
+      pan: typeof details.pan === 'string' ? details.pan : '',
+      drhpStatus: typeof details.drhpStatus === 'string' ? details.drhpStatus : '',
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -170,6 +186,16 @@ export default function UnlistedSharesPage() {
 
     setIsSubmitting(true);
     try {
+      const existingDetails = (editingShare?.details || {}) as Record<string, unknown>;
+      const detailsPayload: Record<string, unknown> = {
+        ...existingDetails,
+        description: formData.description.trim() || undefined,
+        isin: formData.isin.trim() || undefined,
+        cin: formData.cin.trim() || undefined,
+        pan: formData.pan.trim().toUpperCase() || undefined,
+        drhpStatus: formData.drhpStatus.trim() || undefined,
+      };
+
       if (editingShare) {
         const updated = await updateUnlistedShare(editingShare.id, {
           name: formData.name.trim(),
@@ -185,6 +211,7 @@ export default function UnlistedSharesPage() {
           peRatio: formData.peRatio ? parseFloat(formData.peRatio) : undefined,
           marketCapCr: formData.marketCapCr ? parseFloat(formData.marketCapCr) : undefined,
           status: formData.status,
+          details: detailsPayload,
         });
 
         setShares((prev) => prev.map((s) => (s.id === editingShare.id ? updated : s)));
@@ -207,6 +234,7 @@ export default function UnlistedSharesPage() {
           peRatio: formData.peRatio ? parseFloat(formData.peRatio) : undefined,
           marketCapCr: formData.marketCapCr ? parseFloat(formData.marketCapCr) : undefined,
           status: formData.status,
+          details: detailsPayload,
         });
 
         setShares((prev) => [created, ...prev]);
@@ -491,6 +519,52 @@ export default function UnlistedSharesPage() {
               placeholder="https://.../logo.png"
               value={formData.logoUrl}
               onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
+            />
+          </div>
+
+          <div className="pt-4 border-t border-slate-800/80 space-y-4">
+            <h4 className="text-xs font-semibold text-teal-400 uppercase tracking-wider">
+              Statutory, Demat &amp; Company Overview
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Input
+                label="ISIN (Demat Code)"
+                placeholder="e.g. INE012A01034"
+                value={formData.isin}
+                onChange={(e) => setFormData({ ...formData, isin: e.target.value })}
+              />
+
+              <Input
+                label="Corporate CIN"
+                placeholder="e.g. U74999MH2010PLC..."
+                value={formData.cin}
+                onChange={(e) => setFormData({ ...formData, cin: e.target.value })}
+              />
+
+              <Input
+                label="Corporate PAN"
+                placeholder="e.g. AABBC1234D"
+                value={formData.pan}
+                onChange={(e) => setFormData({ ...formData, pan: e.target.value.toUpperCase() })}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label="DRHP Status (Optional)"
+                placeholder="e.g. SEBI Cleared / Filing Anticipated"
+                value={formData.drhpStatus}
+                onChange={(e) => setFormData({ ...formData, drhpStatus: e.target.value })}
+              />
+            </div>
+
+            <Textarea
+              label="Company Overview & Business Model"
+              placeholder="Detailed description of company business, operations, and market positioning..."
+              rows={3}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
 

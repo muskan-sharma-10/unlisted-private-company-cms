@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Loader2,
   X,
+  UserCheck,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -78,6 +79,12 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
           label: 'Dashboard',
           href: '/dashboard',
           icon: LayoutDashboard,
+        },
+        {
+          label: 'Leads & Desk',
+          href: '/dashboard/leads',
+          icon: UserCheck,
+          badge: 'Live',
         },
       ],
     },

@@ -123,3 +123,39 @@ export interface TableColumn<T> {
   align?: 'left' | 'center' | 'right';
   className?: string;
 }
+
+export interface LeadEnquiry {
+  id: string;
+  name: string;
+  email?: string | null;
+  phone: string;
+  enquiryType: string;
+  stockSymbol?: string | null;
+  stockName?: string | null;
+  quantity?: number | null;
+  targetPrice?: number | null;
+  panNumber?: string | null;
+  dematNumber?: string | null;
+  message?: string | null;
+  sourcePage?: string | null;
+  status: 'new' | 'contacted' | 'in_progress' | 'converted' | 'closed' | 'rejected';
+  adminNotes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PartnerApplication {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  organizationName?: string | null;
+  partnerType: string;
+  city?: string | null;
+  message?: string | null;
+  status: 'new' | 'contacted' | 'approved' | 'rejected';
+  adminNotes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+

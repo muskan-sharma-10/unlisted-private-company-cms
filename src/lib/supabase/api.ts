@@ -9,6 +9,8 @@ import type {
   WebsiteSettings,
   PublishStatus,
   ResearchReport,
+  LeadEnquiry,
+  PartnerApplication,
 } from '@/types';
 import { initialHomepageContent, initialSettings } from '@/lib/mock-data';
 
@@ -78,6 +80,7 @@ export async function createUnlistedShare(
     change_percent: share.changePercent || '0.0%',
     change_type: share.changeType || 'up',
     logo_url: share.logoUrl || null,
+    details: share.details || {},
   };
 
   if (share.slug && share.slug.trim()) {
@@ -1029,3 +1032,131 @@ export async function fetchDashboardMetrics(): Promise<DashboardMetrics> {
     testimonials: countByStatus(testimonialsRes.data),
   };
 }
+
+// ==============================================================================
+// 9. LEAD ENQUIRIES & PARTNER APPLICATIONS CRUD
+// ==============================================================================
+
+export async function fetchLeadEnquiries(): Promise<LeadEnquiry[]> {
+  const supabase = getClient();
+  const { data, error } = await supabase
+    .from('lead_enquiries')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('[Supabase API] fetchLeadEnquiries error:', error);
+    return [];
+  }
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    phone: row.phone,
+    enquiryType: row.enquiry_type || 'general',
+    stockSymbol: row.stock_symbol,
+    stockName: row.stock_name,
+    quantity: row.quantity,
+    targetPrice: row.target_price ? Number(row.target_price) : null,
+    panNumber: row.pan_number,
+    dematNumber: row.demat_number,
+    message: row.message,
+    sourcePage: row.source_page,
+    status: row.status || 'new',
+    adminNotes: row.admin_notes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+}
+
+export async function updateLeadEnquiryStatus(
+  id: string,
+  status: string,
+  adminNotes?: string
+): Promise<void> {
+  const supabase = getClient();
+  const payload: Record<string, unknown> = { status };
+  if (adminNotes !== undefined) {
+    payload.admin_notes = adminNotes;
+  }
+
+  const { error } = await supabase
+    .from('lead_enquiries')
+    .update(payload)
+    .eq('id', id);
+
+  if (error) {
+    console.error('[Supabase API] updateLeadEnquiryStatus error:', error);
+    throw new Error(error.message || 'Failed to update lead status');
+  }
+}
+
+export async function deleteLeadEnquiry(id: string): Promise<void> {
+  const supabase = getClient();
+  const { error } = await supabase.from('lead_enquiries').delete().eq('id', id);
+  if (error) {
+    console.error('[Supabase API] deleteLeadEnquiry error:', error);
+    throw new Error(error.message || 'Failed to delete lead');
+  }
+}
+
+export async function fetchPartnerApplications(): Promise<PartnerApplication[]> {
+  const supabase = getClient();
+  const { data, error } = await supabase
+    .from('partner_applications')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('[Supabase API] fetchPartnerApplications error:', error);
+    return [];
+  }
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    fullName: row.full_name,
+    email: row.email,
+    phone: row.phone,
+    organizationName: row.organization_name,
+    partnerType: row.partner_type || 'sub_broker',
+    city: row.city,
+    message: row.message,
+    status: row.status || 'new',
+    adminNotes: row.admin_notes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+}
+
+export async function updatePartnerApplicationStatus(
+  id: string,
+  status: string,
+  adminNotes?: string
+): Promise<void> {
+  const supabase = getClient();
+  const payload: Record<string, unknown> = { status };
+  if (adminNotes !== undefined) {
+    payload.admin_notes = adminNotes;
+  }
+
+  const { error } = await supabase
+    .from('partner_applications')
+    .update(payload)
+    .eq('id', id);
+
+  if (error) {
+    console.error('[Supabase API] updatePartnerApplicationStatus error:', error);
+    throw new Error(error.message || 'Failed to update partner status');
+  }
+}
+
+export async function deletePartnerApplication(id: string): Promise<void> {
+  const supabase = getClient();
+  const { error } = await supabase.from('partner_applications').delete().eq('id', id);
+  if (error) {
+    console.error('[Supabase API] deletePartnerApplication error:', error);
+    throw new Error(error.message || 'Failed to delete partner application');
+  }
+}
+
