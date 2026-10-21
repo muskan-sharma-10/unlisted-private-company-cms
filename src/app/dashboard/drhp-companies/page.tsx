@@ -13,7 +13,32 @@ import {
   deleteDRHPCompany,
 } from '@/lib/supabase/api';
 import { DRHPCompany, TableColumn } from '@/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ExternalLink, Globe, X } from 'lucide-react';
+
+function validateCompanyUrl(url?: string): { isValid: boolean; error?: string; normalized?: string } {
+  if (!url || !url.trim()) return { isValid: true, normalized: '' };
+  const trimmed = url.trim();
+  if (/^(javascript|data|file|ftp):/i.test(trimmed)) {
+    return { isValid: false, error: 'URL must use http:// or https://' };
+  }
+  let urlToTest = trimmed;
+  if (!/^https?:\/\//i.test(urlToTest)) {
+    urlToTest = `https://${urlToTest}`;
+  }
+  try {
+    const parsed = new URL(urlToTest);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return { isValid: false, error: 'URL must start with http:// or https://' };
+    }
+    const hostParts = parsed.hostname.split('.');
+    if (hostParts.length < 2 || hostParts.some((p) => p.length === 0)) {
+      return { isValid: false, error: 'Please enter a valid website URL (e.g. https://example.com)' };
+    }
+    return { isValid: true, normalized: urlToTest };
+  } catch {
+    return { isValid: false, error: 'Please enter a valid website URL (e.g. https://example.com)' };
+  }
+}
 
 export default function DRHPCompaniesPage() {
   const [companies, setCompanies] = useState<DRHPCompany[]>([]);
@@ -39,6 +64,7 @@ export default function DRHPCompaniesPage() {
     expectedDate: '',
     leadManagers: '',
     status: 'draft' as 'draft' | 'published',
+    companyUrl: '',
   });
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -73,6 +99,7 @@ export default function DRHPCompaniesPage() {
       expectedDate: '',
       leadManagers: '',
       status: 'draft',
+      companyUrl: '',
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -91,6 +118,7 @@ export default function DRHPCompaniesPage() {
       expectedDate: company.expectedDate || '',
       leadManagers: company.leadManagers,
       status: company.status,
+      companyUrl: company.companyUrl || '',
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -141,6 +169,13 @@ export default function DRHPCompaniesPage() {
     }
     if (!formData.leadManagers.trim()) errors.leadManagers = 'Lead manager details are required';
 
+    if (formData.companyUrl && formData.companyUrl.trim()) {
+      const urlCheck = validateCompanyUrl(formData.companyUrl);
+      if (!urlCheck.isValid) {
+        errors.companyUrl = urlCheck.error || 'Please enter a valid website URL';
+      }
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -151,6 +186,11 @@ export default function DRHPCompaniesPage() {
 
     setIsSubmitting(true);
     try {
+      const urlCheck = validateCompanyUrl(formData.companyUrl);
+      const normalizedCompanyUrl = formData.companyUrl.trim()
+        ? (urlCheck.normalized || formData.companyUrl.trim())
+        : null;
+
       const payload = {
         companyName: formData.companyName.trim(),
         industry: formData.industry.trim(),
@@ -162,6 +202,7 @@ export default function DRHPCompaniesPage() {
         expectedDate: formData.expectedDate ? formData.expectedDate : undefined,
         leadManagers: formData.leadManagers.trim(),
         status: formData.status,
+        companyUrl: normalizedCompanyUrl,
       };
 
       if (editingCompany) {
@@ -197,7 +238,21 @@ export default function DRHPCompaniesPage() {
       header: 'Company Name',
       render: (item) => (
         <div>
-          <span className="font-semibold text-white block">{item.companyName}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="font-semibold text-white">{item.companyName}</span>
+            {item.companyUrl && (
+              <a
+                href={item.companyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-400 hover:text-indigo-400 transition-colors p-0.5 rounded inline-flex items-center"
+                title={`Open company link: ${item.companyUrl}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            )}
+          </div>
           <span className="text-xs text-slate-400 block">{item.industry}</span>
         </div>
       ),
@@ -420,6 +475,38 @@ export default function DRHPCompaniesPage() {
             error={formErrors.leadManagers}
             required
           />
+
+          <div className="space-y-1">
+            <Input
+              label="Company Link / URL (Optional)"
+              placeholder="e.g. https://www.tatatechnologies.com or https://company.com/ipo"
+              value={formData.companyUrl}
+              onChange={(e) => {
+                setFormData({ ...formData, companyUrl: e.target.value });
+                if (formErrors.companyUrl) {
+                  setFormErrors((prev) => ({ ...prev, companyUrl: '' }));
+                }
+              }}
+              error={formErrors.companyUrl}
+              helperText="Optional official website, investor relations, or DRHP document URL"
+              leftIcon={<Globe className="w-4 h-4" />}
+            />
+            {formData.companyUrl && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData({ ...formData, companyUrl: '' });
+                  if (formErrors.companyUrl) {
+                    setFormErrors((prev) => ({ ...prev, companyUrl: '' }));
+                  }
+                }}
+                className="text-xs text-rose-400 hover:text-rose-300 transition-colors inline-flex items-center gap-1 font-medium pl-0.5"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Clear link</span>
+              </button>
+            )}
+          </div>
         </form>
       </Modal>
 

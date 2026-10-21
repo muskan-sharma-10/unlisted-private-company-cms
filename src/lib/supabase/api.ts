@@ -192,6 +192,33 @@ export async function deleteUnlistedShare(id: string): Promise<void> {
 // 2. DRHP COMPANIES CRUD
 // ==============================================================================
 
+function embedCompanyUrlInDescription(
+  desc: string | null | undefined,
+  url: string | null | undefined
+): string | null {
+  const clean = desc ? desc.replace(/<!--company_url:[^>]*-->/g, '').trim() : '';
+  if (url && url.trim()) {
+    return clean ? `${clean}\n<!--company_url:${url.trim()}-->` : `<!--company_url:${url.trim()}-->`;
+  }
+  return clean || null;
+}
+
+function extractCompanyUrl(row: Record<string, unknown>): string | undefined {
+  if (row.company_url && typeof row.company_url === 'string') return row.company_url;
+  if (row.company_link && typeof row.company_link === 'string') return row.company_link;
+  if (row.description && typeof row.description === 'string') {
+    const match = row.description.match(/<!--company_url:(.*?)-->/);
+    if (match && match[1]) return match[1].trim();
+  }
+  return undefined;
+}
+
+function cleanDescription(desc: string | null | undefined): string | undefined {
+  if (!desc) return undefined;
+  const cleaned = desc.replace(/<!--company_url:[^>]*-->/g, '').trim();
+  return cleaned || undefined;
+}
+
 export async function fetchDRHPCompanies(): Promise<DRHPCompany[]> {
   const supabase = getClient();
   const { data, error } = await supabase
@@ -220,7 +247,8 @@ export async function fetchDRHPCompanies(): Promise<DRHPCompany[]> {
     filingDateText: row.filing_date_text || undefined,
     indicativePrice: row.indicative_price !== null && row.indicative_price !== undefined ? Number(row.indicative_price) : undefined,
     minLot: row.min_lot !== null && row.min_lot !== undefined ? Number(row.min_lot) : 1,
-    description: row.description || undefined,
+    description: cleanDescription(row.description),
+    companyUrl: extractCompanyUrl(row),
   }));
 }
 
@@ -228,7 +256,8 @@ export async function createDRHPCompany(
   company: Omit<DRHPCompany, 'id' | 'updatedAt'>
 ): Promise<DRHPCompany> {
   const supabase = getClient();
-  const payload = {
+  const trimmedUrl = company.companyUrl ? company.companyUrl.trim() : null;
+  const payload: Record<string, unknown> = {
     company_name: company.companyName.trim(),
     industry: company.industry.trim(),
     issue_size_cr: company.issueSizeCr,
@@ -238,22 +267,41 @@ export async function createDRHPCompany(
     status_type: company.statusType || 'review',
     indicative_price: company.indicativePrice !== undefined && company.indicativePrice !== null ? company.indicativePrice : null,
     min_lot: company.minLot !== undefined && company.minLot !== null ? company.minLot : 1,
-    description: company.description?.trim() || null,
+    description: embedCompanyUrlInDescription(company.description?.trim() || null, trimmedUrl),
     expected_date: company.expectedDate ? company.expectedDate : null,
     lead_managers: company.leadManagers.trim(),
     status: company.status,
+    company_url: trimmedUrl,
   };
 
-  const { data, error } = await supabase
+  let { data, error } = await supabase
     .from('drhp_companies')
     .insert(payload)
     .select()
     .single();
 
+  if (error && error.message?.includes('company_url')) {
+    console.warn('[Supabase API] drhp_companies.company_url column not found, embedding in description fallback');
+    const fallbackPayload = { ...payload };
+    delete fallbackPayload.company_url;
+    const retry = await supabase
+      .from('drhp_companies')
+      .insert(fallbackPayload)
+      .select()
+      .single();
+    data = retry.data;
+    error = retry.error;
+  }
+
   if (error) {
     console.error('[Supabase API] createDRHPCompany error:', error);
     throw new Error(error.message || 'Failed to create DRHP company');
   }
+
+  const finalUrl =
+    company.companyUrl === null || company.companyUrl === '' || !trimmedUrl
+      ? undefined
+      : extractCompanyUrl(data) || trimmedUrl;
 
   return {
     id: data.id,
@@ -271,7 +319,8 @@ export async function createDRHPCompany(
     filingDateText: data.filing_date_text || undefined,
     indicativePrice: data.indicative_price !== null && data.indicative_price !== undefined ? Number(data.indicative_price) : undefined,
     minLot: data.min_lot !== null && data.min_lot !== undefined ? Number(data.min_lot) : 1,
-    description: data.description || undefined,
+    description: cleanDescription(data.description),
+    companyUrl: finalUrl,
   };
 }
 
@@ -291,22 +340,60 @@ export async function updateDRHPCompany(
   if (company.statusType !== undefined) payload.status_type = company.statusType;
   if (company.indicativePrice !== undefined) payload.indicative_price = company.indicativePrice;
   if (company.minLot !== undefined) payload.min_lot = company.minLot;
-  if (company.description !== undefined) payload.description = company.description?.trim() || null;
   if (company.expectedDate !== undefined) payload.expected_date = company.expectedDate || null;
   if (company.leadManagers !== undefined) payload.lead_managers = company.leadManagers.trim();
   if (company.status !== undefined) payload.status = company.status;
 
-  const { data, error } = await supabase
+  // Handle companyUrl & sync with description fallback
+  if (company.companyUrl !== undefined) {
+    const trimmedUrl = company.companyUrl ? company.companyUrl.trim() : null;
+    payload.company_url = trimmedUrl;
+
+    let baseDescription = company.description !== undefined ? (company.description?.trim() || null) : undefined;
+    if (baseDescription === undefined) {
+      const { data: existing } = await supabase
+        .from('drhp_companies')
+        .select('description')
+        .eq('id', id)
+        .single();
+      baseDescription = existing?.description || null;
+    }
+    payload.description = embedCompanyUrlInDescription(baseDescription, trimmedUrl);
+  } else if (company.description !== undefined) {
+    payload.description = company.description?.trim() || null;
+  }
+
+  let { data, error } = await supabase
     .from('drhp_companies')
     .update(payload)
     .eq('id', id)
     .select()
     .single();
 
+  if (error && error.message?.includes('company_url')) {
+    console.warn('[Supabase API] drhp_companies.company_url column not found, falling back without company_url column');
+    const fallbackPayload = { ...payload };
+    delete fallbackPayload.company_url;
+
+    const retry = await supabase
+      .from('drhp_companies')
+      .update(fallbackPayload)
+      .eq('id', id)
+      .select()
+      .single();
+    data = retry.data;
+    error = retry.error;
+  }
+
   if (error) {
     console.error('[Supabase API] updateDRHPCompany error:', error);
     throw new Error(error.message || 'Failed to update DRHP company');
   }
+
+  const finalUrl =
+    company.companyUrl === null || company.companyUrl === ''
+      ? undefined
+      : extractCompanyUrl(data) || undefined;
 
   return {
     id: data.id,
@@ -324,7 +411,8 @@ export async function updateDRHPCompany(
     filingDateText: data.filing_date_text || undefined,
     indicativePrice: data.indicative_price !== null && data.indicative_price !== undefined ? Number(data.indicative_price) : undefined,
     minLot: data.min_lot !== null && data.min_lot !== undefined ? Number(data.min_lot) : 1,
-    description: data.description || undefined,
+    description: cleanDescription(data.description),
+    companyUrl: finalUrl,
   };
 }
 

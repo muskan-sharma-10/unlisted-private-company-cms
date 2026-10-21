@@ -36,6 +36,7 @@ export interface DRHPCompany {
   indicativePrice?: number | null;
   minLot?: number | null;
   description?: string | null;
+  companyUrl?: string | null;
 }
 
 export interface ResearchReport {
