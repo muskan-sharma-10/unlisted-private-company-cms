@@ -2,20 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { HugeiconsIcon } from '@hugeicons/react';
 import {
-  TrendingUp,
-  FileSpreadsheet,
-  FileText,
-  BookOpen,
-  Video,
-  MessageSquareQuote,
-  LayoutTemplate,
-  Plus,
-  ArrowUpRight,
-  ShieldCheck,
-  Sparkles,
-  Loader2,
-} from 'lucide-react';
+  ChartIncreaseIcon,
+  FileSpreadsheetIcon,
+  FileTextIcon,
+  BookOpen01Icon,
+  VideoReplayIcon,
+  Comment01Icon,
+  Layout01Icon,
+  PlusSignIcon,
+  ArrowUpRight01Icon,
+  ShieldCheckIcon,
+  SparklesIcon,
+  Loading03Icon,
+} from '@hugeicons/core-free-icons';
 import { StatCard, Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/Badge';
@@ -59,90 +60,97 @@ export default function DashboardOverviewPage() {
   }, []);
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 p-6 sm:p-8">
+    <div className="space-y-6">
+      {/* Welcome Banner - Restrained Financial Presentation */}
+      <div className="relative overflow-hidden rounded-xl bg-card border border-border p-6 sm:p-7 shadow-2xs">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>CMS Administration Portal</span>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+              <HugeiconsIcon icon={SparklesIcon} size={14} />
+              <span>Financial Content Engine</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Welcome back to your Content Hub
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+              Overview &amp; Executive Summary
             </h1>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              Manage unlisted shares, upcoming DRHP IPO filings, research articles, video insights, and public homepage content for{' '}
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              Real-time administration for unlisted equity records, DRHP IPO filings, equity research notes, and live homepage content for{' '}
               <a
                 href="https://unlisted-private-company.vercel.app/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-indigo-400 underline hover:text-indigo-300"
+                className="text-primary font-medium hover:underline inline-flex items-center gap-0.5"
               >
-                unlisted-private-company.vercel.app
+                <span>unlisted-private-company.vercel.app</span>
+                <HugeiconsIcon icon={ArrowUpRight01Icon} size={12} />
               </a>
-              . All records persist to Supabase.
+              . All records persist to Supabase PostgreSQL.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <Link href="/dashboard/unlisted-shares">
-              <Button variant="primary" leftIcon={<Plus className="h-4 w-4" />}>
+              <Button
+                variant="primary"
+                leftIcon={<HugeiconsIcon icon={PlusSignIcon} size={16} />}
+              >
                 Add Unlisted Share
               </Button>
             </Link>
-            <Link href="/dashboard/research-reports">
-              <Button variant="secondary" leftIcon={<FileText className="h-4 w-4" />}>
-                Add Research Note
+            <Link href="/dashboard/drhp-companies">
+              <Button
+                variant="secondary"
+                leftIcon={<HugeiconsIcon icon={FileSpreadsheetIcon} size={16} />}
+              >
+                Add DRHP Filing
               </Button>
             </Link>
           </div>
         </div>
       </div>
 
-      {/* KPI Stats Grid - 6 Core Content Modules */}
+      {/* KPI Stats Grid - 6 Financial Modules */}
       {isLoading ? (
-        <div className="p-8 text-center rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-center space-x-3">
-          <Loader2 className="h-5 w-5 text-indigo-500 animate-spin" />
-          <span className="text-sm text-slate-400">Loading Supabase metrics...</span>
+        <div className="p-8 text-center rounded-xl bg-card border border-border flex items-center justify-center space-x-2.5 text-muted-foreground shadow-2xs">
+          <HugeiconsIcon icon={Loading03Icon} size={20} className="text-primary animate-spin" />
+          <span className="text-sm font-medium">Loading database metrics...</span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
           <StatCard
             title="Unlisted Shares"
             value={metrics.shares.total}
-            subtext={`${metrics.shares.published} Published • ${metrics.shares.draft} Drafts`}
-            icon={<TrendingUp className="h-5 w-5" />}
+            subtext={`${metrics.shares.published} Live • ${metrics.shares.draft} Draft`}
+            icon={<HugeiconsIcon icon={ChartIncreaseIcon} size={20} />}
           />
           <StatCard
             title="DRHP Filings"
             value={metrics.drhp.total}
             subtext={`${metrics.drhp.published} Active • ${metrics.drhp.draft} Pending`}
-            icon={<FileSpreadsheet className="h-5 w-5" />}
+            icon={<HugeiconsIcon icon={FileSpreadsheetIcon} size={20} />}
           />
           <StatCard
             title="Research Reports"
             value={metrics.reports.total}
-            subtext={`${metrics.reports.published} Published • ${metrics.reports.draft} Drafts`}
-            icon={<FileText className="h-5 w-5" />}
+            subtext={`${metrics.reports.published} Live • ${metrics.reports.draft} Draft`}
+            icon={<HugeiconsIcon icon={FileTextIcon} size={20} />}
           />
           <StatCard
             title="Research Blogs"
             value={metrics.blogs.total}
-            subtext={`${metrics.blogs.published} Published • ${metrics.blogs.draft} Drafts`}
-            icon={<BookOpen className="h-5 w-5" />}
+            subtext={`${metrics.blogs.published} Live • ${metrics.blogs.draft} Draft`}
+            icon={<HugeiconsIcon icon={BookOpen01Icon} size={20} />}
           />
           <StatCard
-            title="Video Guides"
+            title="Video Insights"
             value={metrics.videos.total}
-            subtext={`${metrics.videos.published} Published • ${metrics.videos.draft} Drafts`}
-            icon={<Video className="h-5 w-5" />}
+            subtext={`${metrics.videos.published} Live • ${metrics.videos.draft} Draft`}
+            icon={<HugeiconsIcon icon={VideoReplayIcon} size={20} />}
           />
           <StatCard
-            title="Testimonials"
+            title="Client Reviews"
             value={metrics.testimonials.total}
-            subtext={`${metrics.testimonials.published} Published • ${metrics.testimonials.draft} Drafts`}
-            icon={<MessageSquareQuote className="h-5 w-5" />}
+            subtext={`${metrics.testimonials.published} Live • ${metrics.testimonials.draft} Draft`}
+            icon={<HugeiconsIcon icon={Comment01Icon} size={20} />}
           />
         </div>
       )}
@@ -153,52 +161,52 @@ export default function DashboardOverviewPage() {
         <div className="lg:col-span-2">
           <Card
             title="Latest Unlisted Shares"
-            description="Recently updated equity stocks from Supabase"
+            description="Recently updated equity stocks from Supabase database"
             headerAction={
               <Link
                 href="/dashboard/unlisted-shares"
-                className="text-xs text-indigo-400 hover:text-indigo-300 font-medium inline-flex items-center gap-1"
+                className="text-xs text-primary hover:underline font-semibold inline-flex items-center gap-1"
               >
-                <span>View All</span>
-                <ArrowUpRight className="h-3.5 w-3.5" />
+                <span>View Full Directory</span>
+                <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} />
               </Link>
             }
           >
             {isLoading ? (
               <div className="p-8 text-center">
-                <Loader2 className="h-6 w-6 text-indigo-500 animate-spin mx-auto" />
+                <HugeiconsIcon icon={Loading03Icon} size={22} className="text-primary animate-spin mx-auto" />
               </div>
             ) : recentShares.length === 0 ? (
-              <div className="py-8 text-center text-slate-400 text-sm">
+              <div className="py-8 text-center text-muted-foreground text-sm">
                 No unlisted shares found in database. Click &ldquo;Add Unlisted Share&rdquo; above to create one.
               </div>
             ) : (
-              <div className="divide-y divide-slate-800/80 -mx-6 -my-2">
+              <div className="divide-y divide-border/60 -mx-6 -my-2">
                 {recentShares.map((share) => (
                   <div
                     key={share.id}
-                    className="px-6 py-3.5 flex items-center justify-between hover:bg-slate-800/30 transition-colors"
+                    className="px-6 py-3.5 flex items-center justify-between hover:bg-muted/30 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-lg bg-slate-800 border border-slate-700/80 flex items-center justify-center font-bold text-xs text-indigo-400">
+                      <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center font-bold text-xs text-primary font-mono">
                         {share.symbol.slice(0, 3)}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-slate-100">
+                        <p className="text-sm font-semibold text-foreground">
                           {share.name}
                         </p>
-                        <p className="text-xs text-slate-400">
-                          {share.sector} &bull; Lot: {share.lotSize} shares
+                        <p className="text-xs text-muted-foreground">
+                          {share.sector} &bull; Lot Size: <span className="font-tabular font-medium text-foreground">{share.lotSize}</span> shares
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-sm font-bold text-slate-100">
+                        <p className="text-sm font-bold text-foreground font-tabular">
                           ₹{share.currentPrice.toLocaleString('en-IN')}
                         </p>
-                        <p className="text-[11px] text-slate-400">per share</p>
+                        <p className="text-[11px] text-muted-foreground">per share</p>
                       </div>
                       <StatusBadge status={share.status} />
                     </div>
@@ -209,73 +217,73 @@ export default function DashboardOverviewPage() {
           </Card>
         </div>
 
-        {/* Quick Launch & Architecture Guard (1 Column) */}
+        {/* Quick Launch & System Status (1 Column) */}
         <div className="space-y-6">
           <Card
             title="Management Shortcuts"
-            description="Frequently accessed administrative workflows"
+            description="Quick access to active editorial workflows"
           >
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <Link
                 href="/dashboard/drhp-companies"
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-xs font-medium text-slate-200 group"
+                className="flex items-center justify-between p-3 rounded-lg bg-background border border-border hover:border-primary/40 hover:bg-muted/50 transition-all text-xs font-medium text-foreground group shadow-2xs"
               >
                 <div className="flex items-center gap-2.5">
-                  <FileSpreadsheet className="h-4 w-4 text-emerald-400" />
-                  <span>Track New DRHP IPO Filing</span>
+                  <HugeiconsIcon icon={FileSpreadsheetIcon} size={16} className="text-emerald-700 dark:text-emerald-400" />
+                  <span>Track DRHP IPO Filing</span>
                 </div>
-                <ArrowUpRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-white transition-colors" />
+                <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
               </Link>
 
               <Link
-                href="/dashboard/videos"
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-xs font-medium text-slate-200 group"
+                href="/dashboard/leads"
+                className="flex items-center justify-between p-3 rounded-lg bg-background border border-border hover:border-primary/40 hover:bg-muted/50 transition-all text-xs font-medium text-foreground group shadow-2xs"
               >
                 <div className="flex items-center gap-2.5">
-                  <Video className="h-4 w-4 text-rose-400" />
-                  <span>Publish Video Insight</span>
+                  <HugeiconsIcon icon={ChartIncreaseIcon} size={16} className="text-primary" />
+                  <span>Review Inbound Investor Leads</span>
                 </div>
-                <ArrowUpRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-white transition-colors" />
+                <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
               </Link>
 
               <Link
                 href="/dashboard/testimonials"
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-xs font-medium text-slate-200 group"
+                className="flex items-center justify-between p-3 rounded-lg bg-background border border-border hover:border-primary/40 hover:bg-muted/50 transition-all text-xs font-medium text-foreground group shadow-2xs"
               >
                 <div className="flex items-center gap-2.5">
-                  <MessageSquareQuote className="h-4 w-4 text-amber-400" />
+                  <HugeiconsIcon icon={Comment01Icon} size={16} className="text-amber-700 dark:text-amber-400" />
                   <span>Manage Investor Reviews</span>
                 </div>
-                <ArrowUpRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-white transition-colors" />
+                <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
               </Link>
 
               <Link
                 href="/dashboard/homepage"
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80 hover:border-indigo-500/40 hover:bg-slate-900 transition-all text-xs font-medium text-slate-200 group"
+                className="flex items-center justify-between p-3 rounded-lg bg-background border border-border hover:border-primary/40 hover:bg-muted/50 transition-all text-xs font-medium text-foreground group shadow-2xs"
               >
                 <div className="flex items-center gap-2.5">
-                  <LayoutTemplate className="h-4 w-4 text-indigo-400" />
-                  <span>Hero Headline & Announcement</span>
+                  <HugeiconsIcon icon={Layout01Icon} size={16} className="text-blue-700 dark:text-blue-400" />
+                  <span>Hero Headline &amp; Announcement</span>
                 </div>
-                <ArrowUpRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-white transition-colors" />
+                <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
               </Link>
             </div>
           </Card>
 
           {/* Architecture Status Card */}
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950/40 to-slate-950 border border-indigo-500/20 space-y-3">
-            <div className="flex items-center gap-2 text-indigo-400">
-              <ShieldCheck className="h-4 w-4" />
+          <div className="p-5 rounded-xl bg-card border border-border shadow-2xs space-y-3">
+            <div className="flex items-center gap-2 text-primary">
+              <HugeiconsIcon icon={ShieldCheckIcon} size={18} />
               <span className="text-xs font-bold uppercase tracking-wider">
-                Production Database Connected
+                Production Database Active
               </span>
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Mutations and status toggles execute securely against Supabase PostgreSQL using Row Level Security.
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Mutations and status toggles execute securely against Supabase PostgreSQL using strict Row Level Security (RLS).
             </p>
-            <div className="pt-1 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/80">
-              <span>Environment</span>
-              <span className="font-mono text-emerald-400 font-medium">Supabase Auth & RLS</span>
+            <div className="pt-2 flex items-center justify-between text-[11px] text-muted-foreground border-t border-border">
+              <span>Security Policy</span>
+              <span className="font-mono text-emerald-700 dark:text-emerald-400 font-semibold">Verified Admin</span>
             </div>
           </div>
         </div>

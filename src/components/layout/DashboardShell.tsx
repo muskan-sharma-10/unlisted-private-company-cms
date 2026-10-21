@@ -8,7 +8,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       {/* Sidebar for Desktop & Mobile drawer */}
       <Sidebar
         mobileOpen={mobileMenuOpen}
@@ -23,8 +23,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
 
-        <footer className="px-6 py-4 border-t border-slate-900 text-center text-xs text-slate-400">
-          Unlisted CMS Admin Panel &bull; Powered by Next.js 14 App Router & Supabase PostgreSQL
+        <footer className="px-6 py-4 border-t border-border text-center text-xs text-muted-foreground bg-card/30">
+          Unlisted CMS &bull; Financial Research & Publishing Engine &bull; Next.js 14 App Router &amp; Supabase
         </footer>
       </div>
     </div>

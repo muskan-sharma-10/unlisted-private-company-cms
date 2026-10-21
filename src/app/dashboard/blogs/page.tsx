@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Input, Textarea, Select } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
+import { Badge } from '@/components/ui/Badge';
 import {
   fetchBlogs,
   createBlog,
@@ -13,7 +14,8 @@ import {
   deleteBlog,
 } from '@/lib/supabase/api';
 import { BlogArticle, TableColumn } from '@/types';
-import { Loader2 } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Loading03Icon } from '@hugeicons/core-free-icons';
 
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState<BlogArticle[]>([]);
@@ -210,8 +212,8 @@ export default function BlogsPage() {
       header: 'Article Title & Slug',
       render: (item) => (
         <div className="max-w-md">
-          <span className="font-semibold text-white block line-clamp-1">{item.title}</span>
-          <span className="text-xs text-indigo-400 font-mono block">/{item.slug}</span>
+          <span className="font-semibold text-foreground block line-clamp-1">{item.title}</span>
+          <span className="text-xs text-primary font-mono block">/{item.slug}</span>
         </div>
       ),
     },
@@ -219,27 +221,27 @@ export default function BlogsPage() {
       key: 'category',
       header: 'Category',
       render: (item) => (
-        <span className="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
+        <Badge variant="secondary" size="sm">
           {item.category}
-        </span>
+        </Badge>
       ),
     },
     {
       key: 'author',
       header: 'Author',
-      render: (item) => <span className="text-xs text-slate-300">{item.author}</span>,
+      render: (item) => <span className="text-xs text-foreground font-medium">{item.author}</span>,
     },
     {
       key: 'readTime',
       header: 'Read Time',
       align: 'center',
-      render: (item) => <span className="text-xs text-slate-400">{item.readTime}</span>,
+      render: (item) => <span className="text-xs text-muted-foreground">{item.readTime}</span>,
     },
     {
       key: 'publishedAt',
       header: 'Publish Date',
       render: (item) => (
-        <span className="text-xs text-slate-400">
+        <span className="text-xs text-muted-foreground font-tabular">
           {item.publishedAt ? item.publishedAt.split('T')[0] : 'Unpublished'}
         </span>
       ),
@@ -259,9 +261,9 @@ export default function BlogsPage() {
       )}
 
       {isLoading ? (
-        <div className="p-12 text-center rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col items-center justify-center space-y-3">
-          <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
-          <p className="text-sm text-slate-300 font-medium">Loading blog articles from Supabase...</p>
+        <div className="p-12 text-center rounded-xl bg-card border border-border flex flex-col items-center justify-center space-y-2.5 shadow-2xs">
+          <HugeiconsIcon icon={Loading03Icon} size={28} className="text-primary animate-spin" />
+          <p className="text-sm text-foreground font-medium">Loading blog articles from Supabase...</p>
         </div>
       ) : (
         <DataTable<BlogArticle>
@@ -395,9 +397,9 @@ export default function BlogsPage() {
           </>
         }
       >
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-foreground">
           Article to delete:{' '}
-          <strong className="text-white font-semibold">
+          <strong className="text-foreground font-semibold">
             {deleteConfirmItem?.title}
           </strong>
         </p>

@@ -1,12 +1,18 @@
-import React from 'react';
-import { AlertCircle, CheckCircle2, Info, AlertTriangle, X } from 'lucide-react';
+import * as React from 'react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import {
+  InformationCircleIcon,
+  CheckmarkCircle02Icon,
+  Alert02Icon,
+  CancelCircleIcon,
+  Cancel01Icon,
+} from '@hugeicons/core-free-icons';
+import { cn } from '@/lib/utils';
 
-interface AlertProps {
-  variant?: 'info' | 'success' | 'warning' | 'error';
+export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: 'info' | 'success' | 'warning' | 'error' | 'destructive';
   title?: string;
-  children: React.ReactNode;
   onClose?: () => void;
-  className?: string;
 }
 
 export function Alert({
@@ -15,49 +21,96 @@ export function Alert({
   children,
   onClose,
   className = '',
+  ...props
 }: AlertProps) {
   const styles = {
     info: {
-      container: 'bg-sky-500/10 border-sky-500/30 text-sky-200',
-      icon: <Info className="h-5 w-5 text-sky-400 shrink-0 mt-0.5" />,
-      titleColor: 'text-sky-300 font-semibold',
+      container:
+        'border-sky-200 bg-sky-50 text-sky-900 dark:bg-sky-950/40 dark:border-sky-900 dark:text-sky-200',
+      icon: (
+        <HugeiconsIcon
+          icon={InformationCircleIcon}
+          size={18}
+          className="text-sky-600 dark:text-sky-400 shrink-0 mt-0.5"
+        />
+      ),
+      titleColor: 'text-sky-950 dark:text-sky-200 font-semibold',
     },
     success: {
-      container: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200',
-      icon: <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />,
-      titleColor: 'text-emerald-300 font-semibold',
+      container:
+        'border-emerald-200 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-200',
+      icon: (
+        <HugeiconsIcon
+          icon={CheckmarkCircle02Icon}
+          size={18}
+          className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5"
+        />
+      ),
+      titleColor: 'text-emerald-950 dark:text-emerald-200 font-semibold',
     },
     warning: {
-      container: 'bg-amber-500/10 border-amber-500/30 text-amber-200',
-      icon: <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />,
-      titleColor: 'text-amber-300 font-semibold',
+      container:
+        'border-amber-200 bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:border-amber-900 dark:text-amber-200',
+      icon: (
+        <HugeiconsIcon
+          icon={Alert02Icon}
+          size={18}
+          className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"
+        />
+      ),
+      titleColor: 'text-amber-950 dark:text-amber-200 font-semibold',
     },
     error: {
-      container: 'bg-rose-500/10 border-rose-500/30 text-rose-200',
-      icon: <AlertCircle className="h-5 w-5 text-rose-400 shrink-0 mt-0.5" />,
-      titleColor: 'text-rose-300 font-semibold',
+      container:
+        'border-red-200 bg-red-50 text-red-900 dark:bg-red-950/40 dark:border-red-900 dark:text-red-200',
+      icon: (
+        <HugeiconsIcon
+          icon={CancelCircleIcon}
+          size={18}
+          className="text-red-600 dark:text-red-400 shrink-0 mt-0.5"
+        />
+      ),
+      titleColor: 'text-red-950 dark:text-red-200 font-semibold',
+    },
+    destructive: {
+      container:
+        'border-red-200 bg-red-50 text-red-900 dark:bg-red-950/40 dark:border-red-900 dark:text-red-200',
+      icon: (
+        <HugeiconsIcon
+          icon={CancelCircleIcon}
+          size={18}
+          className="text-red-600 dark:text-red-400 shrink-0 mt-0.5"
+        />
+      ),
+      titleColor: 'text-red-950 dark:text-red-200 font-semibold',
     },
   };
 
-  const current = styles[variant];
+  const current = styles[variant] || styles.info;
 
   return (
     <div
-      className={`relative flex items-start gap-3 rounded-xl border p-4 text-sm shadow-sm transition-all ${current.container} ${className}`}
+      role="alert"
+      className={cn(
+        'relative flex items-start gap-3 rounded-xl border p-4 text-sm shadow-2xs transition-all',
+        current.container,
+        className
+      )}
+      {...props}
     >
       {current.icon}
-      <div className="flex-1 space-y-0.5">
-        {title && <p className={current.titleColor}>{title}</p>}
+      <div className="flex-1 space-y-0.5 min-w-0">
+        {title && <h5 className={cn('text-sm font-semibold leading-tight', current.titleColor)}>{title}</h5>}
         <div className="text-xs leading-relaxed opacity-95">{children}</div>
       </div>
       {onClose && (
         <button
           onClick={onClose}
           type="button"
-          className="text-slate-400 hover:text-slate-200 transition-colors p-1 -mr-1 -mt-1 rounded-lg"
+          className="text-muted-foreground hover:text-foreground transition-colors p-1 -mr-1 -mt-1 rounded-md"
           aria-label="Close alert"
         >
-          <X className="h-4 w-4" />
+          <HugeiconsIcon icon={Cancel01Icon} size={16} />
         </button>
       )}
     </div>

@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Input, Select } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
+import { Badge } from '@/components/ui/Badge';
 import {
   fetchDRHPCompanies,
   createDRHPCompany,
@@ -13,7 +14,13 @@ import {
   deleteDRHPCompany,
 } from '@/lib/supabase/api';
 import { DRHPCompany, TableColumn } from '@/types';
-import { Loader2, ExternalLink, Globe, X } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import {
+  ArrowUpRight01Icon,
+  Globe02Icon,
+  Cancel01Icon,
+  Loading03Icon,
+} from '@hugeicons/core-free-icons';
 
 function validateCompanyUrl(url?: string): { isValid: boolean; error?: string; normalized?: string } {
   if (!url || !url.trim()) return { isValid: true, normalized: '' };
@@ -239,47 +246,47 @@ export default function DRHPCompaniesPage() {
       render: (item) => (
         <div>
           <div className="flex items-center gap-1.5">
-            <span className="font-semibold text-white">{item.companyName}</span>
+            <span className="font-semibold text-foreground">{item.companyName}</span>
             {item.companyUrl && (
               <a
                 href={item.companyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-indigo-400 transition-colors p-0.5 rounded inline-flex items-center"
+                className="text-muted-foreground hover:text-primary transition-colors p-0.5 rounded inline-flex items-center"
                 title={`Open company link: ${item.companyUrl}`}
                 onClick={(e) => e.stopPropagation()}
               >
-                <ExternalLink className="h-3.5 w-3.5" />
+                <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} />
               </a>
             )}
           </div>
-          <span className="text-xs text-slate-400 block">{item.industry}</span>
+          <span className="text-xs text-muted-foreground block">{item.industry}</span>
         </div>
       ),
     },
     {
       key: 'regulatoryStatus',
       header: 'Regulatory Status',
-      render: (item) => (
-        <span
-          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
-            item.statusType === 'cleared'
-              ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800/40'
-              : item.statusType === 'approved'
-              ? 'bg-blue-950/60 text-blue-300 border-blue-800/40'
-              : 'bg-amber-950/60 text-amber-300 border-amber-800/40'
-          }`}
-        >
-          {item.regulatoryStatus || 'Under Review'}
-        </span>
-      ),
+      render: (item) => {
+        const variant =
+          item.statusType === 'cleared'
+            ? 'success'
+            : item.statusType === 'approved'
+            ? 'info'
+            : 'warning';
+        return (
+          <Badge variant={variant} size="sm">
+            {item.regulatoryStatus || 'Under Review'}
+          </Badge>
+        );
+      },
     },
     {
       key: 'issueSizeCr',
       header: 'Issue Size (Cr)',
       align: 'right',
       render: (item) => (
-        <span className="font-bold text-slate-100">
+        <span className="font-bold text-foreground font-tabular">
           ₹{item.issueSizeCr.toLocaleString('en-IN')} Cr
         </span>
       ),
@@ -289,11 +296,11 @@ export default function DRHPCompaniesPage() {
       header: 'Filing Date / Milestone',
       render: (item) => (
         <div>
-          <span className="text-xs text-slate-200 block">
+          <span className="text-xs text-foreground font-tabular block">
             {item.filingDate || item.filingDateText || 'TBA'}
           </span>
           {item.filingDate && item.filingDateText && (
-            <span className="text-[10px] text-slate-400 block">{item.filingDateText}</span>
+            <span className="text-[10px] text-muted-foreground block">{item.filingDateText}</span>
           )}
         </div>
       ),
@@ -302,7 +309,7 @@ export default function DRHPCompaniesPage() {
       key: 'expectedDate',
       header: 'Expected IPO',
       render: (item) => (
-        <span className="text-xs text-indigo-300 font-medium">
+        <span className="text-xs text-primary font-medium font-tabular">
           {item.expectedDate || 'TBA'}
         </span>
       ),
@@ -311,7 +318,7 @@ export default function DRHPCompaniesPage() {
       key: 'leadManagers',
       header: 'Book Running Lead Managers',
       render: (item) => (
-        <span className="text-xs text-slate-400 truncate max-w-xs block">
+        <span className="text-xs text-muted-foreground truncate max-w-xs block">
           {item.leadManagers}
         </span>
       ),
@@ -331,14 +338,14 @@ export default function DRHPCompaniesPage() {
       )}
 
       {isLoading ? (
-        <div className="p-12 text-center rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col items-center justify-center space-y-3">
-          <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
-          <p className="text-sm text-slate-300 font-medium">Loading DRHP companies from Supabase...</p>
+        <div className="p-12 text-center rounded-xl bg-card border border-border flex flex-col items-center justify-center space-y-2.5 shadow-2xs">
+          <HugeiconsIcon icon={Loading03Icon} size={28} className="text-primary animate-spin" />
+          <p className="text-sm text-foreground font-medium">Loading DRHP companies from Supabase...</p>
         </div>
       ) : (
         <DataTable<DRHPCompany>
           title="DRHP Companies & IPO Filings"
-          description="Track Draft Red Herring Prospectus documents filed with SEBI."
+          description="Track Draft Red Herring Prospectus documents filed with market regulator SEBI."
           data={companies}
           columns={columns}
           searchPlaceholder="Search company or industry..."
@@ -489,7 +496,7 @@ export default function DRHPCompaniesPage() {
               }}
               error={formErrors.companyUrl}
               helperText="Optional official website, investor relations, or DRHP document URL"
-              leftIcon={<Globe className="w-4 h-4" />}
+              leftIcon={<HugeiconsIcon icon={Globe02Icon} size={16} />}
             />
             {formData.companyUrl && (
               <button
@@ -500,9 +507,9 @@ export default function DRHPCompaniesPage() {
                     setFormErrors((prev) => ({ ...prev, companyUrl: '' }));
                   }
                 }}
-                className="text-xs text-rose-400 hover:text-rose-300 transition-colors inline-flex items-center gap-1 font-medium pl-0.5"
+                className="text-xs text-destructive hover:underline transition-colors inline-flex items-center gap-1 font-medium pl-0.5"
               >
-                <X className="w-3.5 h-3.5" />
+                <HugeiconsIcon icon={Cancel01Icon} size={14} />
                 <span>Clear link</span>
               </button>
             )}
@@ -528,9 +535,9 @@ export default function DRHPCompaniesPage() {
           </>
         }
       >
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-foreground">
           Record to delete:{' '}
-          <strong className="text-white font-semibold">
+          <strong className="text-foreground font-semibold">
             {deleteConfirmItem?.companyName}
           </strong>
         </p>

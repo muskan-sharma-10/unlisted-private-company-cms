@@ -1,21 +1,23 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { HugeiconsIcon } from '@hugeicons/react';
 import {
-  Search,
-  Plus,
-  SlidersHorizontal,
-  ChevronLeft,
-  ChevronRight,
-  Edit2,
-  Trash2,
-  Globe,
-  FileEdit,
-  Inbox,
-} from 'lucide-react';
+  Search01Icon,
+  PlusSignIcon,
+  SlidersHorizontalIcon,
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  Edit02Icon,
+  Delete02Icon,
+  Globe02Icon,
+  FileEditIcon,
+  InboxIcon,
+} from '@hugeicons/core-free-icons';
 import { Button } from './Button';
 import { StatusBadge } from './Badge';
 import { TableColumn, PublishStatus } from '@/types';
+import { cn } from '@/lib/utils';
 
 export interface BaseItem {
   id: string;
@@ -71,7 +73,7 @@ export function DataTable<T extends BaseItem>({
         return String(item[searchKey]).toLowerCase().includes(searchTerm.toLowerCase());
       }
 
-      // Default: match any string value
+      // Default: match any string or number value
       return Object.values(item as Record<string, unknown>).some((val) =>
         typeof val === 'string' || typeof val === 'number'
           ? String(val).toLowerCase().includes(searchTerm.toLowerCase())
@@ -90,15 +92,15 @@ export function DataTable<T extends BaseItem>({
   return (
     <div className="space-y-4">
       {/* Top Header & Actions */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-white">{title}</h2>
-          {description && <p className="text-xs text-slate-400 mt-1">{description}</p>}
+          <h2 className="text-xl font-bold tracking-tight text-foreground">{title}</h2>
+          {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
         </div>
         {onAddNew && (
           <Button
             onClick={onAddNew}
-            leftIcon={<Plus className="h-4 w-4" />}
+            leftIcon={<HugeiconsIcon icon={PlusSignIcon} size={16} className="shrink-0" />}
             size="md"
             variant="primary"
           >
@@ -108,9 +110,13 @@ export function DataTable<T extends BaseItem>({
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-sm">
+      <div className="bg-card border border-border rounded-xl p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-2xs">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <HugeiconsIcon
+            icon={Search01Icon}
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+          />
           <input
             type="text"
             value={searchTerm}
@@ -119,27 +125,29 @@ export function DataTable<T extends BaseItem>({
               setCurrentPage(1);
             }}
             placeholder={searchPlaceholder}
-            className="w-full bg-slate-950/70 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            className="w-full bg-background border border-input rounded-lg pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300">
-            <SlidersHorizontal className="h-3.5 w-3.5 text-slate-400" />
-            <span>Filter:</span>
+          <div className="flex items-center gap-2 bg-background border border-input rounded-lg px-3 py-1.5 text-xs text-foreground shadow-2xs">
+            <HugeiconsIcon icon={SlidersHorizontalIcon} size={14} className="text-muted-foreground shrink-0" />
+            <span className="text-muted-foreground">Status:</span>
             <select
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value as 'all' | 'published' | 'draft');
                 setCurrentPage(1);
               }}
-              className="bg-transparent font-medium text-slate-200 focus:outline-none cursor-pointer"
+              className="bg-transparent font-medium text-foreground focus:outline-none cursor-pointer"
             >
-              <option value="all" className="bg-slate-900">All Statuses ({data.length})</option>
-              <option value="published" className="bg-slate-900">
+              <option value="all" className="bg-card text-foreground">
+                All Records ({data.length})
+              </option>
+              <option value="published" className="bg-card text-foreground">
                 Published ({data.filter((d) => d.status === 'published').length})
               </option>
-              <option value="draft" className="bg-slate-900">
+              <option value="draft" className="bg-card text-foreground">
                 Drafts ({data.filter((d) => d.status === 'draft').length})
               </option>
             </select>
@@ -148,40 +156,42 @@ export function DataTable<T extends BaseItem>({
       </div>
 
       {/* Table Container */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-card border border-border rounded-xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-slate-950/70 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-800">
+          <table className="w-full text-left text-sm text-foreground">
+            <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
               <tr>
                 {columns.map((col) => (
                   <th
                     key={col.key}
                     scope="col"
-                    className={`px-5 py-3.5 font-semibold ${
+                    className={cn(
+                      'px-5 py-3 font-semibold text-xs',
                       col.align === 'right'
                         ? 'text-right'
                         : col.align === 'center'
                         ? 'text-center'
-                        : 'text-left'
-                    } ${col.className || ''}`}
+                        : 'text-left',
+                      col.className
+                    )}
                   >
                     {col.header}
                   </th>
                 ))}
-                <th scope="col" className="px-5 py-3.5 text-center font-semibold">
+                <th scope="col" className="px-5 py-3 text-center font-semibold text-xs">
                   Status
                 </th>
-                <th scope="col" className="px-5 py-3.5 text-right font-semibold">
+                <th scope="col" className="px-5 py-3 text-right font-semibold text-xs">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80">
+            <tbody className="divide-y divide-border/60">
               {isLoading ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <tr key={i} className="animate-pulse">
                     <td colSpan={columns.length + 2} className="px-5 py-4">
-                      <div className="h-4 bg-slate-800 rounded w-3/4 mb-1"></div>
+                      <div className="h-4 bg-muted rounded w-3/4 mb-1"></div>
                     </td>
                   </tr>
                 ))
@@ -189,17 +199,17 @@ export function DataTable<T extends BaseItem>({
                 <tr>
                   <td
                     colSpan={columns.length + 2}
-                    className="px-5 py-12 text-center text-slate-400"
+                    className="px-5 py-12 text-center text-muted-foreground"
                   >
-                    <div className="flex flex-col items-center justify-center space-y-3">
-                      <div className="p-3 bg-slate-800/50 rounded-full border border-slate-700/60 text-slate-400">
-                        <Inbox className="h-6 w-6" />
+                    <div className="flex flex-col items-center justify-center space-y-2.5">
+                      <div className="p-3 bg-muted rounded-full border border-border text-muted-foreground">
+                        <HugeiconsIcon icon={InboxIcon} size={24} />
                       </div>
-                      <p className="text-sm font-medium text-slate-300">No records found</p>
-                      <p className="text-xs text-slate-500 max-w-xs">
+                      <p className="text-sm font-semibold text-foreground">No records found</p>
+                      <p className="text-xs text-muted-foreground max-w-sm">
                         {searchTerm
-                          ? `No matches for "${searchTerm}". Try resetting your search or filter.`
-                          : 'Get started by creating your first record using the button above.'}
+                          ? `No matches found for "${searchTerm}". Try adjusting your search query or status filter.`
+                          : 'Get started by creating your first entry using the button above.'}
                       </p>
                     </div>
                   </td>
@@ -208,18 +218,20 @@ export function DataTable<T extends BaseItem>({
                 paginatedData.map((item) => (
                   <tr
                     key={item.id}
-                    className="hover:bg-slate-800/40 transition-colors group"
+                    className="hover:bg-muted/30 transition-colors group"
                   >
                     {columns.map((col) => (
                       <td
                         key={col.key}
-                        className={`px-5 py-4 text-slate-200 ${
+                        className={cn(
+                          'px-5 py-3.5 text-foreground text-xs leading-normal',
                           col.align === 'right'
-                            ? 'text-right'
+                            ? 'text-right font-tabular'
                             : col.align === 'center'
                             ? 'text-center'
-                            : 'text-left'
-                        } ${col.className || ''}`}
+                            : 'text-left',
+                          col.className
+                        )}
                       >
                         {col.render
                           ? col.render(item)
@@ -228,12 +240,12 @@ export function DataTable<T extends BaseItem>({
                     ))}
 
                     {/* Status Column */}
-                    <td className="px-5 py-4 text-center">
+                    <td className="px-5 py-3.5 text-center">
                       <StatusBadge status={item.status} />
                     </td>
 
                     {/* Action Column */}
-                    <td className="px-5 py-4 text-right">
+                    <td className="px-5 py-3.5 text-right">
                       <div className="inline-flex items-center gap-1.5">
                         {onToggleStatus && (
                           <button
@@ -241,20 +253,20 @@ export function DataTable<T extends BaseItem>({
                             onClick={() => onToggleStatus(item)}
                             title={
                               item.status === 'published'
-                                ? 'Unpublish (set to draft)'
-                                : 'Publish to live website'
+                                ? 'Unpublish (convert to draft)'
+                                : 'Publish live'
                             }
-                            className={`p-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                            className={cn(
+                              'p-1.5 rounded-lg border text-xs font-medium transition-colors shadow-2xs',
                               item.status === 'published'
-                                ? 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10'
-                                : 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10'
-                            }`}
-                          >
-                            {item.status === 'published' ? (
-                              <FileEdit className="h-4 w-4" />
-                            ) : (
-                              <Globe className="h-4 w-4" />
+                                ? 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300'
+                                : 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300'
                             )}
+                          >
+                            <HugeiconsIcon
+                              icon={item.status === 'published' ? FileEditIcon : Globe02Icon}
+                              size={15}
+                            />
                           </button>
                         )}
                         {onEdit && (
@@ -262,9 +274,9 @@ export function DataTable<T extends BaseItem>({
                             type="button"
                             onClick={() => onEdit(item)}
                             title="Edit record"
-                            className="p-1.5 rounded-lg border border-slate-700/80 text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+                            className="p-1.5 rounded-lg border border-border bg-background hover:bg-muted text-foreground transition-colors shadow-2xs"
                           >
-                            <Edit2 className="h-4 w-4" />
+                            <HugeiconsIcon icon={Edit02Icon} size={15} />
                           </button>
                         )}
                         {onDelete && (
@@ -272,9 +284,9 @@ export function DataTable<T extends BaseItem>({
                             type="button"
                             onClick={() => onDelete(item)}
                             title="Delete record"
-                            className="p-1.5 rounded-lg border border-slate-700/80 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors"
+                            className="p-1.5 rounded-lg border border-border bg-background hover:bg-red-50 hover:border-red-200 text-destructive dark:hover:bg-red-950/40 dark:hover:border-red-900/50 transition-colors shadow-2xs"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <HugeiconsIcon icon={Delete02Icon} size={15} />
                           </button>
                         )}
                       </div>
@@ -287,38 +299,38 @@ export function DataTable<T extends BaseItem>({
         </div>
 
         {/* Table Footer / Pagination */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3 border-t border-slate-800 bg-slate-950/40 text-xs text-slate-400">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3 border-t border-border bg-muted/20 text-xs text-muted-foreground">
           <p>
             Showing{' '}
-            <span className="font-semibold text-slate-200">
+            <span className="font-semibold text-foreground font-tabular">
               {filteredData.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}
             </span>{' '}
             to{' '}
-            <span className="font-semibold text-slate-200">
+            <span className="font-semibold text-foreground font-tabular">
               {Math.min(currentPage * pageSize, filteredData.length)}
             </span>{' '}
-            of <span className="font-semibold text-slate-200">{filteredData.length}</span>{' '}
+            of <span className="font-semibold text-foreground font-tabular">{filteredData.length}</span>{' '}
             records
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-border bg-background text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs text-xs"
             >
-              <ChevronLeft className="h-3.5 w-3.5" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
               <span>Previous</span>
             </button>
-            <span className="px-2 font-medium text-slate-300">
+            <span className="px-2 font-medium text-foreground font-tabular text-xs">
               {currentPage} / {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages || filteredData.length === 0}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-border bg-background text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs text-xs"
             >
               <span>Next</span>
-              <ChevronRight className="h-3.5 w-3.5" />
+              <HugeiconsIcon icon={ArrowRight01Icon} size={14} />
             </button>
           </div>
         </div>

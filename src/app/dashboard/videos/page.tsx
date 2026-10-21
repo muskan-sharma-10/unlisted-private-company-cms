@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Input, Select } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
+import { Badge } from '@/components/ui/Badge';
 import {
   fetchVideos,
   createVideo,
@@ -13,7 +14,8 @@ import {
   deleteVideo,
 } from '@/lib/supabase/api';
 import { VideoContent, TableColumn } from '@/types';
-import { Play, Loader2 } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { PlayIcon, Loading03Icon } from '@hugeicons/core-free-icons';
 
 export default function VideosPage() {
   const [videos, setVideos] = useState<VideoContent[]>([]);
@@ -187,14 +189,14 @@ export default function VideosPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setPreviewVideo(item)}
-            className="h-9 w-12 rounded bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 text-indigo-400 shrink-0 group transition-colors"
+            className="h-8 w-11 rounded-md bg-muted border border-border flex items-center justify-center hover:bg-primary hover:text-primary-foreground text-primary shrink-0 group transition-colors shadow-2xs cursor-pointer"
             title="Preview Video"
           >
-            <Play className="h-4 w-4 group-hover:scale-110 transition-transform" />
+            <HugeiconsIcon icon={PlayIcon} size={15} className="group-hover:scale-110 transition-transform" />
           </button>
           <div>
-            <span className="font-semibold text-white block line-clamp-1">{item.title}</span>
-            <span className="text-xs text-slate-400 font-mono">ID: {item.youtubeId}</span>
+            <span className="font-semibold text-foreground block line-clamp-1">{item.title}</span>
+            <span className="text-xs text-muted-foreground font-mono">ID: {item.youtubeId}</span>
           </div>
         </div>
       ),
@@ -203,16 +205,16 @@ export default function VideosPage() {
       key: 'category',
       header: 'Category',
       render: (item) => (
-        <span className="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
+        <Badge variant="secondary" size="sm">
           {item.category}
-        </span>
+        </Badge>
       ),
     },
     {
       key: 'duration',
       header: 'Duration',
       align: 'center',
-      render: (item) => <span className="text-xs text-slate-400">{item.duration}</span>,
+      render: (item) => <span className="text-xs text-muted-foreground font-tabular font-medium">{item.duration}</span>,
     },
   ];
 
@@ -229,9 +231,9 @@ export default function VideosPage() {
       )}
 
       {isLoading ? (
-        <div className="p-12 text-center rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col items-center justify-center space-y-3">
-          <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
-          <p className="text-sm text-slate-300 font-medium">Loading videos from Supabase...</p>
+        <div className="p-12 text-center rounded-xl bg-card border border-border flex flex-col items-center justify-center space-y-2.5 shadow-2xs">
+          <HugeiconsIcon icon={Loading03Icon} size={28} className="text-primary animate-spin" />
+          <p className="text-sm text-foreground font-medium">Loading videos from Supabase...</p>
         </div>
       ) : (
         <DataTable<VideoContent>
@@ -335,7 +337,7 @@ export default function VideosPage() {
         maxWidth="lg"
       >
         {previewVideo && (
-          <div className="aspect-video w-full rounded-xl overflow-hidden bg-black border border-slate-800">
+          <div className="aspect-video w-full rounded-lg overflow-hidden bg-black border border-border shadow-xs">
             <iframe
               className="w-full h-full"
               src={`https://www.youtube-nocookie.com/embed/${previewVideo.youtubeId}?autoplay=1`}
@@ -365,9 +367,9 @@ export default function VideosPage() {
           </>
         }
       >
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-foreground">
           Video to delete:{' '}
-          <strong className="text-white font-semibold">
+          <strong className="text-foreground font-semibold">
             {deleteConfirmItem?.title}
           </strong>
         </p>

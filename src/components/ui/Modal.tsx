@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+import * as React from 'react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Cancel01Icon } from '@hugeicons/core-free-icons';
+import { cn } from '@/lib/utils';
 
-interface ModalProps {
+export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
@@ -22,69 +25,55 @@ export function Modal({
   footer,
   maxWidth = 'lg',
 }: ModalProps) {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
   const maxWidths = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
-    '2xl': 'max-w-2xl',
+    sm: 'sm:max-w-sm',
+    md: 'sm:max-w-md',
+    lg: 'sm:max-w-lg',
+    xl: 'sm:max-w-xl',
+    '2xl': 'sm:max-w-2xl',
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Modal Card */}
-      <div
-        className={`relative w-full ${maxWidths[maxWidth]} rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl p-6 sm:p-7 z-10 transition-all text-slate-100 my-8`}
-        role="dialog"
-        aria-modal="true"
-      >
-        <div className="flex items-start justify-between pb-4 border-b border-slate-800">
-          <div>
-            <h3 className="text-lg font-semibold tracking-tight text-white">{title}</h3>
-            {description && (
-              <p className="text-xs text-slate-400 mt-1">{description}</p>
-            )}
+    <DialogPrimitive.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-2xs data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content
+          className={cn(
+            'fixed left-[50%] top-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border border-border bg-card p-6 shadow-xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-xl',
+            maxWidths[maxWidth]
+          )}
+        >
+          <div className="flex items-start justify-between pb-3 border-b border-border/80">
+            <div className="space-y-1">
+              <DialogPrimitive.Title className="text-base font-semibold leading-none tracking-tight text-foreground">
+                {title}
+              </DialogPrimitive.Title>
+              {description && (
+                <DialogPrimitive.Description className="text-xs text-muted-foreground mt-1">
+                  {description}
+                </DialogPrimitive.Description>
+              )}
+            </div>
+            <DialogPrimitive.Close
+              onClick={onClose}
+              className="rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+              aria-label="Close dialog"
+            >
+              <HugeiconsIcon icon={Cancel01Icon} size={18} />
+            </DialogPrimitive.Close>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-            aria-label="Close dialog"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
 
-        <div className="py-5 max-h-[70vh] overflow-y-auto pr-1">{children}</div>
-
-        {footer && (
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-            {footer}
+          <div className="py-2 max-h-[70vh] overflow-y-auto pr-1 text-sm text-foreground">
+            {children}
           </div>
-        )}
-      </div>
-    </div>
+
+          {footer && (
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border/80">
+              {footer}
+            </div>
+          )}
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }

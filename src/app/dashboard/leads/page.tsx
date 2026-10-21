@@ -10,16 +10,20 @@ import {
   deletePartnerApplication,
 } from '@/lib/supabase/api';
 import type { LeadEnquiry, PartnerApplication } from '@/types';
+import { HugeiconsIcon } from '@hugeicons/react';
 import {
-  UserCheck,
-  Search,
-  Phone,
-  Trash2,
-  Eye,
-  Download,
-  RefreshCw,
-  X,
-} from 'lucide-react';
+  UserCheck01Icon,
+  Search01Icon,
+  Call02Icon,
+  Delete02Icon,
+  ViewIcon,
+  Download01Icon,
+  ArrowReloadHorizontalIcon,
+} from '@hugeicons/core-free-icons';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { cn } from '@/lib/utils';
 
 export default function LeadsDashboardPage() {
   const [activeTab, setActiveTab] = useState<'leads' | 'partners'>('leads');
@@ -58,10 +62,22 @@ export default function LeadsDashboardPage() {
     try {
       await updateLeadEnquiryStatus(id, newStatus, adminNote || undefined);
       setLeads((prev) =>
-        prev.map((l) => (l.id === id ? { ...l, status: newStatus as LeadEnquiry['status'], adminNotes: adminNote || l.adminNotes } : l))
+        prev.map((l) =>
+          l.id === id
+            ? { ...l, status: newStatus as LeadEnquiry['status'], adminNotes: adminNote || l.adminNotes }
+            : l
+        )
       );
       if (selectedLead && selectedLead.id === id) {
-        setSelectedLead((prev) => prev ? { ...prev, status: newStatus as LeadEnquiry['status'], adminNotes: adminNote || prev.adminNotes } : null);
+        setSelectedLead((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: newStatus as LeadEnquiry['status'],
+                adminNotes: adminNote || prev.adminNotes,
+              }
+            : null
+        );
       }
     } catch (err) {
       console.error(err);
@@ -85,10 +101,26 @@ export default function LeadsDashboardPage() {
     try {
       await updatePartnerApplicationStatus(id, newStatus, adminNote || undefined);
       setPartners((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, status: newStatus as PartnerApplication['status'], adminNotes: adminNote || p.adminNotes } : p))
+        prev.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                status: newStatus as PartnerApplication['status'],
+                adminNotes: adminNote || p.adminNotes,
+              }
+            : p
+        )
       );
       if (selectedPartner && selectedPartner.id === id) {
-        setSelectedPartner((prev) => prev ? { ...prev, status: newStatus as PartnerApplication['status'], adminNotes: adminNote || prev.adminNotes } : null);
+        setSelectedPartner((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: newStatus as PartnerApplication['status'],
+                adminNotes: adminNote || prev.adminNotes,
+              }
+            : null
+        );
       }
     } catch (err) {
       console.error(err);
@@ -157,145 +189,160 @@ export default function LeadsDashboardPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'new':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/30">New</span>;
+        return <Badge variant="info">New</Badge>;
       case 'contacted':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">Contacted</span>;
+        return <Badge variant="warning">Contacted</Badge>;
       case 'in_progress':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/30">In Progress</span>;
+        return <Badge variant="secondary">In Progress</Badge>;
       case 'converted':
       case 'approved':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Converted</span>;
+        return <Badge variant="success">Converted</Badge>;
       case 'closed':
       case 'rejected':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">Closed</span>;
+        return <Badge variant="destructive">Closed</Badge>;
       default:
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400">{status}</span>;
+        return <Badge variant="neutral">{status}</Badge>;
     }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-            <UserCheck className="w-8 h-8 text-teal-400" />
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+            <HugeiconsIcon icon={UserCheck01Icon} size={28} className="text-primary" />
             <span>Investor Leads &amp; Dealing Desk</span>
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
             Real-time buy/sell inquiries, ESOP liquidity requests, and partner onboarding applications from portal.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
+        <div className="flex items-center gap-2.5">
+          <Button
             onClick={loadData}
-            className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-xs font-medium inline-flex items-center gap-2 transition-colors"
+            variant="outline"
+            size="sm"
+            leftIcon={
+              <HugeiconsIcon
+                icon={ArrowReloadHorizontalIcon}
+                size={14}
+                className={isLoading ? 'animate-spin' : ''}
+              />
+            }
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
-          </button>
-          <button
+            Refresh
+          </Button>
+          <Button
             onClick={exportCSV}
-            className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold inline-flex items-center gap-2 transition-all shadow-md shadow-teal-500/20"
+            variant="primary"
+            size="sm"
+            leftIcon={<HugeiconsIcon icon={Download01Icon} size={14} />}
           >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export CSV</span>
-          </button>
+            Export CSV
+          </Button>
         </div>
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5">
-          <span className="text-xs text-slate-400 font-medium block">Total Leads Logged</span>
-          <div className="text-2xl font-bold text-white mt-1">{leads.length}</div>
-          <span className="text-[11px] text-teal-400 mt-1 block">Dealing Desk Inquiries</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="bg-card border border-border rounded-xl p-4 shadow-2xs">
+          <span className="text-xs text-muted-foreground font-medium block">Total Leads Logged</span>
+          <div className="text-2xl font-bold text-foreground mt-1 font-tabular">{leads.length}</div>
+          <span className="text-[11px] text-primary mt-1 block font-medium">Dealing Desk Inquiries</span>
         </div>
 
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5">
-          <span className="text-xs text-slate-400 font-medium block">New Unread Leads</span>
-          <div className="text-2xl font-bold text-amber-400 mt-1">{newLeadsCount}</div>
-          <span className="text-[11px] text-amber-400/80 mt-1 block">Awaiting First Outreach</span>
+        <div className="bg-card border border-border rounded-xl p-4 shadow-2xs">
+          <span className="text-xs text-muted-foreground font-medium block">New Unread Leads</span>
+          <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 mt-1 font-tabular">{newLeadsCount}</div>
+          <span className="text-[11px] text-amber-800 dark:text-amber-400/80 mt-1 block font-medium">Awaiting First Outreach</span>
         </div>
 
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5">
-          <span className="text-xs text-slate-400 font-medium block">Partner Applications</span>
-          <div className="text-2xl font-bold text-white mt-1">{partners.length}</div>
-          <span className="text-[11px] text-teal-400 mt-1 block">{newPartnersCount} New Pending Review</span>
+        <div className="bg-card border border-border rounded-xl p-4 shadow-2xs">
+          <span className="text-xs text-muted-foreground font-medium block">Partner Applications</span>
+          <div className="text-2xl font-bold text-foreground mt-1 font-tabular">{partners.length}</div>
+          <span className="text-[11px] text-primary mt-1 block font-medium">{newPartnersCount} New Pending Review</span>
         </div>
 
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5">
-          <span className="text-xs text-slate-400 font-medium block">Conversion Rate</span>
-          <div className="text-2xl font-bold text-emerald-400 mt-1">
+        <div className="bg-card border border-border rounded-xl p-4 shadow-2xs">
+          <span className="text-xs text-muted-foreground font-medium block">Conversion Rate</span>
+          <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mt-1 font-tabular">
             {leads.length > 0 ? `${Math.round((leads.filter((l) => l.status === 'converted').length / leads.length) * 100)}%` : '0%'}
           </div>
-          <span className="text-[11px] text-emerald-400/80 mt-1 block">Closed &amp; Demat Settled</span>
+          <span className="text-[11px] text-emerald-800 dark:text-emerald-400/80 mt-1 block font-medium">Closed &amp; Demat Settled</span>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="border-b border-slate-800 flex items-center justify-between">
+      <div className="border-b border-border flex items-center justify-between">
         <div className="flex items-center space-x-6">
           <button
             onClick={() => { setActiveTab('leads'); setStatusFilter('all'); }}
-            className={`pb-4 text-sm font-semibold relative transition-colors ${
-              activeTab === 'leads' ? 'text-teal-400' : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className={cn(
+              'pb-3 text-sm font-semibold relative transition-colors cursor-pointer',
+              activeTab === 'leads' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             <span>Dealing Desk &amp; Stock Leads ({leads.length})</span>
             {newLeadsCount > 0 && (
-              <span className="ml-2 px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 rounded-full border border-amber-500/30">
+              <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 rounded-full border border-amber-300">
                 {newLeadsCount} new
               </span>
             )}
             {activeTab === 'leads' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-teal-400" />
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
             )}
           </button>
 
           <button
             onClick={() => { setActiveTab('partners'); setStatusFilter('all'); }}
-            className={`pb-4 text-sm font-semibold relative transition-colors ${
-              activeTab === 'partners' ? 'text-teal-400' : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className={cn(
+              'pb-3 text-sm font-semibold relative transition-colors cursor-pointer',
+              activeTab === 'partners' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             <span>Partner Desk Applications ({partners.length})</span>
             {newPartnersCount > 0 && (
-              <span className="ml-2 px-2 py-0.5 text-[10px] font-bold bg-teal-500/20 text-teal-300 rounded-full border border-teal-500/30">
+              <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300 rounded-full border border-blue-300">
                 {newPartnersCount} new
               </span>
             )}
             {activeTab === 'partners' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-teal-400" />
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
             )}
           </button>
         </div>
       </div>
 
       {/* Controls: Search and Filters */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
+          <HugeiconsIcon
+            icon={Search01Icon}
+            size={16}
+            className="text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={activeTab === 'leads' ? 'Search investor name, phone, stock...' : 'Search partner name, email, city...'}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-teal-500"
+            className="w-full pl-9 pr-4 py-2 bg-background border border-input rounded-lg text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors shadow-2xs"
           />
-          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           {['all', 'new', 'contacted', 'in_progress', 'converted', 'closed'].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize whitespace-nowrap transition-colors ${
+              className={cn(
+                'px-2.5 py-1 rounded-md text-xs font-semibold capitalize whitespace-nowrap transition-colors shadow-2xs',
                 statusFilter === st
-                  ? 'bg-teal-600 text-white'
-                  : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
-              }`}
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-background text-muted-foreground hover:text-foreground border border-input'
+              )}
             >
               {st.replace('_', ' ')}
             </button>
@@ -304,67 +351,67 @@ export default function LeadsDashboardPage() {
       </div>
 
       {/* Table Section */}
-      <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-card border border-border rounded-xl overflow-hidden shadow-2xs">
         {activeTab === 'leads' ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950/80 border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
+            <table className="w-full text-left text-xs text-foreground">
+              <thead className="bg-muted/40 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
                 <tr>
-                  <th className="py-4 px-6">Investor / Contact</th>
-                  <th className="py-4 px-6">Type</th>
-                  <th className="py-4 px-6">Stock Requested</th>
-                  <th className="py-4 px-6">Quantity &amp; Value</th>
-                  <th className="py-4 px-6">Status</th>
-                  <th className="py-4 px-6">Date</th>
-                  <th className="py-4 px-6 text-right">Actions</th>
+                  <th className="py-3.5 px-5">Investor / Contact</th>
+                  <th className="py-3.5 px-5">Type</th>
+                  <th className="py-3.5 px-5">Stock Requested</th>
+                  <th className="py-3.5 px-5">Quantity &amp; Value</th>
+                  <th className="py-3.5 px-5">Status</th>
+                  <th className="py-3.5 px-5">Date</th>
+                  <th className="py-3.5 px-5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-border/60">
                 {filteredLeads.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-500">
+                    <td colSpan={7} className="py-12 text-center text-muted-foreground">
                       No lead inquiries found matching the selected filter.
                     </td>
                   </tr>
                 ) : (
                   filteredLeads.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="py-4 px-6">
-                        <div className="font-semibold text-white text-sm">{item.name}</div>
-                        <div className="text-slate-400 flex items-center gap-1.5 mt-0.5">
-                          <Phone className="w-3 h-3 text-teal-400" />
-                          <span>{item.phone}</span>
+                    <tr key={item.id} className="hover:bg-muted/30 transition-colors">
+                      <td className="py-3.5 px-5">
+                        <div className="font-semibold text-foreground text-sm">{item.name}</div>
+                        <div className="text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                          <HugeiconsIcon icon={Call02Icon} size={13} className="text-primary shrink-0" />
+                          <span className="font-tabular">{item.phone}</span>
                         </div>
-                        {item.email && <div className="text-slate-500 text-[11px]">{item.email}</div>}
+                        {item.email && <div className="text-muted-foreground text-[11px]">{item.email}</div>}
                       </td>
 
-                      <td className="py-4 px-6">
-                        <span className="capitalize font-medium text-slate-300">
+                      <td className="py-3.5 px-5">
+                        <span className="capitalize font-medium text-foreground">
                           {item.enquiryType.replace('_', ' ')}
                         </span>
                       </td>
 
-                      <td className="py-4 px-6">
-                        <div className="font-semibold text-teal-300">{item.stockName || 'General Inquiry'}</div>
-                        {item.stockSymbol && <div className="text-[11px] text-slate-500">{item.stockSymbol}</div>}
+                      <td className="py-3.5 px-5">
+                        <div className="font-semibold text-primary">{item.stockName || 'General Inquiry'}</div>
+                        {item.stockSymbol && <div className="text-[11px] text-muted-foreground font-mono">{item.stockSymbol}</div>}
                       </td>
 
-                      <td className="py-4 px-6">
-                        <div className="font-semibold text-white">
+                      <td className="py-3.5 px-5">
+                        <div className="font-semibold text-foreground font-tabular">
                           {item.quantity ? `${item.quantity.toLocaleString('en-IN')} shares` : '—'}
                         </div>
                         {item.targetPrice && (
-                          <div className="text-slate-400 text-[11px]">
+                          <div className="text-muted-foreground text-[11px] font-tabular">
                             @ ₹{item.targetPrice.toLocaleString('en-IN')}
                           </div>
                         )}
                       </td>
 
-                      <td className="py-4 px-6">
+                      <td className="py-3.5 px-5">
                         <select
                           value={item.status}
                           onChange={(e) => handleUpdateLeadStatus(item.id, e.target.value)}
-                          className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-teal-400"
+                          className="bg-background border border-input rounded-md px-2.5 py-1 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer shadow-2xs"
                         >
                           <option value="new">New</option>
                           <option value="contacted">Contacted</option>
@@ -374,25 +421,25 @@ export default function LeadsDashboardPage() {
                         </select>
                       </td>
 
-                      <td className="py-4 px-6 text-slate-400">
+                      <td className="py-3.5 px-5 text-muted-foreground font-tabular">
                         {item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : 'Recent'}
                       </td>
 
-                      <td className="py-4 px-6 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="py-3.5 px-5 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => { setSelectedLead(item); setAdminNote(item.adminNotes || ''); }}
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                            className="p-1.5 rounded-md border border-border bg-background hover:bg-muted text-foreground transition-colors shadow-2xs"
                             title="Inspect Lead"
                           >
-                            <Eye className="w-4 h-4" />
+                            <HugeiconsIcon icon={ViewIcon} size={15} />
                           </button>
                           <button
                             onClick={() => handleDeleteLead(item.id)}
-                            className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
+                            className="p-1.5 rounded-md border border-border bg-background hover:bg-red-50 hover:border-red-200 text-destructive dark:hover:bg-red-950/40 dark:hover:border-red-900/50 transition-colors shadow-2xs"
                             title="Delete Lead"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <HugeiconsIcon icon={Delete02Icon} size={15} />
                           </button>
                         </div>
                       </td>
@@ -404,53 +451,53 @@ export default function LeadsDashboardPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950/80 border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
+            <table className="w-full text-left text-xs text-foreground">
+              <thead className="bg-muted/40 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
                 <tr>
-                  <th className="py-4 px-6">Applicant Name</th>
-                  <th className="py-4 px-6">Contact Info</th>
-                  <th className="py-4 px-6">Category</th>
-                  <th className="py-4 px-6">City / Base</th>
-                  <th className="py-4 px-6">Status</th>
-                  <th className="py-4 px-6">Submitted</th>
-                  <th className="py-4 px-6 text-right">Actions</th>
+                  <th className="py-3.5 px-5">Applicant Name</th>
+                  <th className="py-3.5 px-5">Contact Info</th>
+                  <th className="py-3.5 px-5">Category</th>
+                  <th className="py-3.5 px-5">City / Base</th>
+                  <th className="py-3.5 px-5">Status</th>
+                  <th className="py-3.5 px-5">Submitted</th>
+                  <th className="py-3.5 px-5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-border/60">
                 {filteredPartners.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-500">
+                    <td colSpan={7} className="py-12 text-center text-muted-foreground">
                       No partner desk applications found.
                     </td>
                   </tr>
                 ) : (
                   filteredPartners.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="py-4 px-6">
-                        <div className="font-semibold text-white text-sm">{item.fullName}</div>
-                        {item.organizationName && <div className="text-slate-400 text-[11px]">{item.organizationName}</div>}
+                    <tr key={item.id} className="hover:bg-muted/30 transition-colors">
+                      <td className="py-3.5 px-5">
+                        <div className="font-semibold text-foreground text-sm">{item.fullName}</div>
+                        {item.organizationName && <div className="text-muted-foreground text-[11px]">{item.organizationName}</div>}
                       </td>
 
-                      <td className="py-4 px-6">
-                        <div className="text-slate-300">{item.phone}</div>
-                        <div className="text-slate-500 text-[11px]">{item.email}</div>
+                      <td className="py-3.5 px-5">
+                        <div className="text-foreground font-tabular">{item.phone}</div>
+                        <div className="text-muted-foreground text-[11px]">{item.email}</div>
                       </td>
 
-                      <td className="py-4 px-6">
-                        <span className="capitalize font-medium text-teal-300">
+                      <td className="py-3.5 px-5">
+                        <span className="capitalize font-medium text-primary">
                           {item.partnerType.replace('-', ' ')}
                         </span>
                       </td>
 
-                      <td className="py-4 px-6 text-slate-300">
+                      <td className="py-3.5 px-5 text-muted-foreground">
                         {item.city || '—'}
                       </td>
 
-                      <td className="py-4 px-6">
+                      <td className="py-3.5 px-5">
                         <select
                           value={item.status}
                           onChange={(e) => handleUpdatePartnerStatus(item.id, e.target.value)}
-                          className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-teal-400"
+                          className="bg-background border border-input rounded-md px-2.5 py-1 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer shadow-2xs"
                         >
                           <option value="new">New</option>
                           <option value="contacted">Contacted</option>
@@ -459,25 +506,25 @@ export default function LeadsDashboardPage() {
                         </select>
                       </td>
 
-                      <td className="py-4 px-6 text-slate-400">
+                      <td className="py-3.5 px-5 text-muted-foreground font-tabular">
                         {item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : 'Recent'}
                       </td>
 
-                      <td className="py-4 px-6 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="py-3.5 px-5 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => { setSelectedPartner(item); setAdminNote(item.adminNotes || ''); }}
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                            className="p-1.5 rounded-md border border-border bg-background hover:bg-muted text-foreground transition-colors shadow-2xs"
                             title="View Application"
                           >
-                            <Eye className="w-4 h-4" />
+                            <HugeiconsIcon icon={ViewIcon} size={15} />
                           </button>
                           <button
                             onClick={() => handleDeletePartner(item.id)}
-                            className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
+                            className="p-1.5 rounded-md border border-border bg-background hover:bg-red-50 hover:border-red-200 text-destructive dark:hover:bg-red-950/40 dark:hover:border-red-900/50 transition-colors shadow-2xs"
                             title="Delete Application"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <HugeiconsIcon icon={Delete02Icon} size={15} />
                           </button>
                         </div>
                       </td>
@@ -492,57 +539,68 @@ export default function LeadsDashboardPage() {
 
       {/* Lead Detail Modal */}
       {selectedLead && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 text-white space-y-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-              <div>
-                <span className="text-xs font-semibold uppercase text-teal-400">Lead Inspection</span>
-                <h3 className="text-lg font-bold text-white">{selectedLead.name}</h3>
-              </div>
-              <button onClick={() => setSelectedLead(null)} className="p-1 rounded-lg text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
-              </button>
+        <Modal
+          isOpen={!!selectedLead}
+          onClose={() => setSelectedLead(null)}
+          title={`Lead Inspection: ${selectedLead.name}`}
+          description="Inbound investor deal inquiry details from public portal"
+          maxWidth="lg"
+          footer={
+            <div className="flex items-center justify-between w-full">
+              <Button
+                variant="primary"
+                onClick={() => handleUpdateLeadStatus(selectedLead.id, selectedLead.status)}
+              >
+                Save Internal Notes
+              </Button>
+              <Button variant="secondary" onClick={() => setSelectedLead(null)}>
+                Close
+              </Button>
             </div>
-
+          }
+        >
+          <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
-                <span className="text-slate-400 block mb-0.5">Phone Number</span>
-                <a href={`tel:${selectedLead.phone}`} className="font-semibold text-teal-400 hover:underline">{selectedLead.phone}</a>
+                <span className="text-muted-foreground block mb-0.5 font-medium">Phone Number</span>
+                <a href={`tel:${selectedLead.phone}`} className="font-semibold text-primary hover:underline font-tabular">
+                  {selectedLead.phone}
+                </a>
               </div>
               <div>
-                <span className="text-slate-400 block mb-0.5">Email Address</span>
-                <span className="font-semibold">{selectedLead.email || 'N/A'}</span>
+                <span className="text-muted-foreground block mb-0.5 font-medium">Email Address</span>
+                <span className="font-semibold text-foreground">{selectedLead.email || 'N/A'}</span>
               </div>
               <div>
-                <span className="text-slate-400 block mb-0.5">Stock Requested</span>
-                <span className="font-semibold text-white">{selectedLead.stockName || 'General Enquiry'}</span>
+                <span className="text-muted-foreground block mb-0.5 font-medium">Stock Requested</span>
+                <span className="font-semibold text-foreground">{selectedLead.stockName || 'General Enquiry'}</span>
               </div>
               <div>
-                <span className="text-slate-400 block mb-0.5">Quantity / Indicative Consideration</span>
-                <span className="font-semibold">
+                <span className="text-muted-foreground block mb-0.5 font-medium">Quantity / Indicative Rate</span>
+                <span className="font-semibold text-foreground font-tabular">
                   {selectedLead.quantity ? `${selectedLead.quantity} shares` : 'N/A'}{' '}
                   {selectedLead.targetPrice && `@ ₹${selectedLead.targetPrice}`}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block mb-0.5">Source Page</span>
-                <span className="font-mono text-[11px] text-slate-400">{selectedLead.sourcePage || 'Website'}</span>
+                <span className="text-muted-foreground block mb-0.5 font-medium">Source Page</span>
+                <span className="font-mono text-[11px] text-muted-foreground">{selectedLead.sourcePage || 'Website'}</span>
               </div>
               <div>
-                <span className="text-slate-400 block mb-0.5">Current Status</span>
+                <span className="text-muted-foreground block mb-0.5 font-medium">Current Status</span>
                 {getStatusBadge(selectedLead.status)}
               </div>
             </div>
 
             {selectedLead.message && (
-              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-xs">
-                <span className="text-slate-400 block mb-1 font-semibold">Investor Instructions / Note:</span>
-                <p className="text-slate-200">{selectedLead.message}</p>
+              <div className="p-3 bg-muted/50 rounded-lg border border-border text-xs">
+                <span className="text-muted-foreground block mb-1 font-semibold">Investor Instructions / Note:</span>
+                <p className="text-foreground">{selectedLead.message}</p>
               </div>
             )}
 
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+              <label className="text-xs font-semibold text-foreground block mb-1.5">
                 Internal Dealing Desk Notes
               </label>
               <textarea
@@ -550,78 +608,74 @@ export default function LeadsDashboardPage() {
                 value={adminNote}
                 onChange={(e) => setAdminNote(e.target.value)}
                 placeholder="Log call status, CMR verification status, rate negotiated..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-teal-400"
+                className="w-full bg-background border border-input rounded-lg p-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
-
-            <div className="flex items-center justify-between pt-4 border-t border-slate-800">
-              <button
-                onClick={() => handleUpdateLeadStatus(selectedLead.id, selectedLead.status)}
-                className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs transition-colors"
-              >
-                Save Notes
-              </button>
-              <button
-                onClick={() => setSelectedLead(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"
-              >
-                Close
-              </button>
-            </div>
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* Partner Detail Modal */}
       {selectedPartner && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 text-white space-y-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-              <div>
-                <span className="text-xs font-semibold uppercase text-teal-400">Partner Application</span>
-                <h3 className="text-lg font-bold text-white">{selectedPartner.fullName}</h3>
-              </div>
-              <button onClick={() => setSelectedPartner(null)} className="p-1 rounded-lg text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
-              </button>
+        <Modal
+          isOpen={!!selectedPartner}
+          onClose={() => setSelectedPartner(null)}
+          title={`Partner Application: ${selectedPartner.fullName}`}
+          description="Broker, wealth manager, or institutional partner onboarding review"
+          maxWidth="lg"
+          footer={
+            <div className="flex items-center justify-between w-full">
+              <Button
+                variant="primary"
+                onClick={() => handleUpdatePartnerStatus(selectedPartner.id, selectedPartner.status)}
+              >
+                Save Review Notes
+              </Button>
+              <Button variant="secondary" onClick={() => setSelectedPartner(null)}>
+                Close
+              </Button>
             </div>
-
+          }
+        >
+          <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
-                <span className="text-slate-400 block mb-0.5">Phone</span>
-                <a href={`tel:${selectedPartner.phone}`} className="font-semibold text-teal-400 hover:underline">{selectedPartner.phone}</a>
+                <span className="text-muted-foreground block mb-0.5 font-medium">Phone Number</span>
+                <a href={`tel:${selectedPartner.phone}`} className="font-semibold text-primary hover:underline font-tabular">
+                  {selectedPartner.phone}
+                </a>
               </div>
               <div>
-                <span className="text-slate-400 block mb-0.5">Email</span>
-                <span className="font-semibold">{selectedPartner.email}</span>
+                <span className="text-muted-foreground block mb-0.5 font-medium">Email Address</span>
+                <span className="font-semibold text-foreground">{selectedPartner.email}</span>
               </div>
               <div>
-                <span className="text-slate-400 block mb-0.5">Organization</span>
-                <span className="font-semibold text-white">{selectedPartner.organizationName || 'Individual'}</span>
+                <span className="text-muted-foreground block mb-0.5 font-medium">Organization</span>
+                <span className="font-semibold text-foreground">{selectedPartner.organizationName || 'Individual'}</span>
               </div>
               <div>
-                <span className="text-slate-400 block mb-0.5">Category</span>
-                <span className="capitalize font-semibold text-teal-300">{selectedPartner.partnerType.replace('-', ' ')}</span>
+                <span className="text-muted-foreground block mb-0.5 font-medium">Category</span>
+                <span className="capitalize font-semibold text-primary">{selectedPartner.partnerType.replace('-', ' ')}</span>
               </div>
               <div>
-                <span className="text-slate-400 block mb-0.5">Base City</span>
-                <span className="font-semibold">{selectedPartner.city || 'N/A'}</span>
+                <span className="text-muted-foreground block mb-0.5 font-medium">Base City</span>
+                <span className="font-semibold text-foreground">{selectedPartner.city || 'N/A'}</span>
               </div>
               <div>
-                <span className="text-slate-400 block mb-0.5">Status</span>
+                <span className="text-muted-foreground block mb-0.5 font-medium">Current Status</span>
                 {getStatusBadge(selectedPartner.status)}
               </div>
             </div>
 
             {selectedPartner.message && (
-              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-xs">
-                <span className="text-slate-400 block mb-1 font-semibold">Collaboration Scope / Notes:</span>
-                <p className="text-slate-200">{selectedPartner.message}</p>
+              <div className="p-3 bg-muted/50 rounded-lg border border-border text-xs">
+                <span className="text-muted-foreground block mb-1 font-semibold">Collaboration Scope / Notes:</span>
+                <p className="text-foreground">{selectedPartner.message}</p>
               </div>
             )}
 
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+              <label className="text-xs font-semibold text-foreground block mb-1.5">
                 Internal Partnership Review Notes
               </label>
               <textarea
@@ -629,26 +683,11 @@ export default function LeadsDashboardPage() {
                 value={adminNote}
                 onChange={(e) => setAdminNote(e.target.value)}
                 placeholder="Broker license verification, commission structure agreed, onboarding steps..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-teal-400"
+                className="w-full bg-background border border-input rounded-lg p-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
-
-            <div className="flex items-center justify-between pt-4 border-t border-slate-800">
-              <button
-                onClick={() => handleUpdatePartnerStatus(selectedPartner.id, selectedPartner.status)}
-                className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs transition-colors"
-              >
-                Save Notes
-              </button>
-              <button
-                onClick={() => setSelectedPartner(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"
-              >
-                Close
-              </button>
-            </div>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

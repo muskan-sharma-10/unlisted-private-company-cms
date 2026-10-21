@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Input, Textarea, Select } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
+import { Badge } from '@/components/ui/Badge';
 import {
   fetchResearchReports,
   createResearchReport,
@@ -13,7 +14,12 @@ import {
   deleteResearchReport,
 } from '@/lib/supabase/api';
 import { ResearchReport, TableColumn } from '@/types';
-import { Loader2, FileText, ExternalLink } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import {
+  FileTextIcon,
+  ArrowUpRight01Icon,
+  Loading03Icon,
+} from '@hugeicons/core-free-icons';
 
 export default function ResearchReportsPage() {
   const [reports, setReports] = useState<ResearchReport[]>([]);
@@ -217,17 +223,17 @@ export default function ResearchReportsPage() {
       header: 'Title & Type',
       render: (item) => (
         <div className="space-y-1">
-          <div className="font-semibold text-slate-100 flex items-center gap-1.5">
-            <FileText className="h-4 w-4 text-indigo-400 shrink-0" />
+          <div className="font-semibold text-foreground flex items-center gap-1.5">
+            <HugeiconsIcon icon={FileTextIcon} size={16} className="text-primary shrink-0" />
             <span>{item.title}</span>
           </div>
-          <div className="text-xs text-slate-400 flex items-center gap-2">
-            <span className="px-1.5 py-0.5 rounded bg-slate-800 text-indigo-300 font-mono text-[10px]">
+          <div className="text-xs text-muted-foreground flex items-center gap-2">
+            <span className="px-1.5 py-0.5 rounded bg-muted text-foreground border border-border font-mono text-[10px]">
               {item.reportType}
             </span>
-            <span>/reports/{item.slug}</span>
+            <span className="font-mono text-[11px]">/reports/{item.slug}</span>
             {item.stockSlug && (
-              <span className="text-emerald-400 font-mono">Stock: {item.stockSlug}</span>
+              <span className="text-emerald-700 dark:text-emerald-400 font-mono text-[11px]">Stock: {item.stockSlug}</span>
             )}
           </div>
         </div>
@@ -238,8 +244,8 @@ export default function ResearchReportsPage() {
       header: 'Analyst & Read Time',
       render: (item) => (
         <div className="text-xs space-y-0.5">
-          <p className="text-slate-200 font-medium">{item.analyst}</p>
-          <p className="text-slate-400">{item.readTime}</p>
+          <p className="text-foreground font-medium">{item.analyst}</p>
+          <p className="text-muted-foreground">{item.readTime}</p>
         </div>
       ),
     },
@@ -248,7 +254,7 @@ export default function ResearchReportsPage() {
       header: 'Views',
       align: 'right',
       render: (item) => (
-        <span className="text-xs font-mono text-slate-300">
+        <span className="text-xs font-mono font-tabular text-foreground">
           {(item.viewsCount || 0).toLocaleString()}
         </span>
       ),
@@ -262,28 +268,22 @@ export default function ResearchReportsPage() {
             href={item.pdfUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 underline"
+            className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium"
           >
             <span>View PDF</span>
-            <ExternalLink className="h-3 w-3" />
+            <HugeiconsIcon icon={ArrowUpRight01Icon} size={13} />
           </a>
         ) : (
-          <span className="text-xs text-slate-400">None attached</span>
+          <span className="text-xs text-muted-foreground">None attached</span>
         ),
     },
     {
       key: 'status',
       header: 'Publishing',
       render: (item) => (
-        <span
-          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium uppercase tracking-wider ${
-            item.status === 'published'
-              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-              : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-          }`}
-        >
-          {item.status}
-        </span>
+        <Badge variant={item.status === 'published' ? 'success' : 'warning'} size="sm">
+          {item.status === 'published' ? 'Published' : 'Draft'}
+        </Badge>
       ),
     },
   ];
@@ -301,9 +301,9 @@ export default function ResearchReportsPage() {
       )}
 
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center p-12 bg-slate-900/40 border border-slate-800 rounded-xl space-y-3">
-          <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
-          <p className="text-sm text-slate-300 font-medium">Loading research reports from Supabase...</p>
+        <div className="flex flex-col items-center justify-center p-12 bg-card border border-border rounded-xl space-y-2.5 shadow-2xs">
+          <HugeiconsIcon icon={Loading03Icon} size={28} className="text-primary animate-spin" />
+          <p className="text-sm text-foreground font-medium">Loading research reports from Supabase...</p>
         </div>
       ) : (
         <DataTable<ResearchReport>
@@ -482,9 +482,9 @@ export default function ResearchReportsPage() {
           </>
         }
       >
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-foreground">
           Report to delete:{' '}
-          <strong className="text-white font-semibold">
+          <strong className="text-foreground font-semibold">
             {deleteConfirmItem?.title}
           </strong>
         </p>

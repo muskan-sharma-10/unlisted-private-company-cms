@@ -13,7 +13,8 @@ import {
   deleteTestimonial,
 } from '@/lib/supabase/api';
 import { Testimonial, TableColumn } from '@/types';
-import { Star, Loader2 } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { StarIcon, Loading03Icon } from '@hugeicons/core-free-icons';
 
 export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -181,8 +182,8 @@ export default function TestimonialsPage() {
       header: 'Client & Role',
       render: (item) => (
         <div>
-          <span className="font-semibold text-white block">{item.clientName}</span>
-          <span className="text-xs text-slate-400 block">
+          <span className="font-semibold text-foreground block">{item.clientName}</span>
+          <span className="text-xs text-muted-foreground block">
             {item.role} {item.company ? `• ${item.company}` : ''}
           </span>
         </div>
@@ -193,9 +194,9 @@ export default function TestimonialsPage() {
       header: 'Rating',
       align: 'center',
       render: (item) => (
-        <div className="flex items-center justify-center gap-1 text-amber-400">
+        <div className="flex items-center justify-center gap-0.5 text-amber-500">
           {Array.from({ length: item.rating }).map((_, i) => (
-            <Star key={i} className="h-3.5 w-3.5 fill-current" />
+            <HugeiconsIcon key={i} icon={StarIcon} size={14} className="fill-current" />
           ))}
         </div>
       ),
@@ -204,7 +205,7 @@ export default function TestimonialsPage() {
       key: 'review',
       header: 'Review Excerpt',
       render: (item) => (
-        <p className="text-xs text-slate-300 italic line-clamp-2 max-w-md">
+        <p className="text-xs text-muted-foreground italic line-clamp-2 max-w-md">
           “{item.review}”
         </p>
       ),
@@ -224,9 +225,9 @@ export default function TestimonialsPage() {
       )}
 
       {isLoading ? (
-        <div className="p-12 text-center rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col items-center justify-center space-y-3">
-          <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
-          <p className="text-sm text-slate-300 font-medium">Loading testimonials from Supabase...</p>
+        <div className="p-12 text-center rounded-xl bg-card border border-border flex flex-col items-center justify-center space-y-2.5 shadow-2xs">
+          <HugeiconsIcon icon={Loading03Icon} size={28} className="text-primary animate-spin" />
+          <p className="text-sm text-foreground font-medium">Loading testimonials from Supabase...</p>
         </div>
       ) : (
         <DataTable<Testimonial>
@@ -347,9 +348,9 @@ export default function TestimonialsPage() {
           </>
         }
       >
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-foreground">
           Client review to delete:{' '}
-          <strong className="text-white font-semibold">
+          <strong className="text-foreground font-semibold">
             {deleteConfirmItem?.clientName}
           </strong>
         </p>

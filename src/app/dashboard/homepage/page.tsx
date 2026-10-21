@@ -5,10 +5,18 @@ import { Card } from '@/components/ui/Card';
 import { Input, Textarea, Select } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
+import { Badge } from '@/components/ui/Badge';
 import { fetchHomepageContent, updateHomepageContent } from '@/lib/supabase/api';
 import { initialHomepageContent } from '@/lib/mock-data';
 import { HomepageSection } from '@/types';
-import { Sparkles, Eye, Check, ExternalLink, Loader2 } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import {
+  SparklesIcon,
+  ViewIcon,
+  CheckmarkCircle02Icon,
+  ArrowUpRight01Icon,
+  Loading03Icon,
+} from '@hugeicons/core-free-icons';
 
 export default function HomepageContentPage() {
   const [content, setContent] = useState<HomepageSection>(initialHomepageContent);
@@ -54,13 +62,14 @@ export default function HomepageContentPage() {
 
   return (
     <div className="space-y-6">
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-white">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">
             Homepage Content Management
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Configure the prominent hero banner, headline copy, announcement bar, and call-to-actions. Changes commit directly to Supabase.
+          <p className="text-xs text-muted-foreground mt-1">
+            Configure the prominent hero banner, headline copy, announcement bar, and investor call-to-actions.
           </p>
         </div>
 
@@ -69,11 +78,11 @@ export default function HomepageContentPage() {
             href="https://unlisted-private-company.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-border bg-card text-xs font-medium text-foreground hover:bg-muted/80 hover:border-slate-300 shadow-xs transition-colors"
           >
-            <Eye className="h-4 w-4" />
+            <HugeiconsIcon icon={ViewIcon} size={15} className="text-muted-foreground" />
             <span>View Live Site</span>
-            <ExternalLink className="h-3 w-3 text-slate-400" />
+            <HugeiconsIcon icon={ArrowUpRight01Icon} size={13} className="text-muted-foreground" />
           </a>
         </div>
       </div>
@@ -99,41 +108,46 @@ export default function HomepageContentPage() {
       )}
 
       {isLoading ? (
-        <div className="p-12 text-center rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col items-center justify-center space-y-3">
-          <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
-          <p className="text-sm text-slate-300 font-medium">Loading homepage configuration from Supabase...</p>
+        <div className="p-12 text-center rounded-xl bg-card border border-border flex flex-col items-center justify-center space-y-3 shadow-xs">
+          <HugeiconsIcon icon={Loading03Icon} size={30} className="text-primary animate-spin" />
+          <p className="text-sm text-foreground font-medium">Loading homepage configuration from Supabase...</p>
         </div>
       ) : (
         <>
           {/* Live Preview Card */}
-          <div className="rounded-2xl border border-indigo-500/30 bg-gradient-to-b from-slate-900 to-slate-950 p-6 space-y-4 shadow-lg">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2 text-xs font-semibold text-indigo-400 uppercase tracking-wider">
-                <Sparkles className="h-4 w-4" />
+          <div className="rounded-xl border border-primary/20 bg-linear-to-b from-blue-50/40 via-card to-card p-6 space-y-5 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
+              <div className="flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-wider">
+                <HugeiconsIcon icon={SparklesIcon} size={16} />
                 <span>Interactive Live Hero Preview</span>
               </div>
-              <span className="text-[11px] text-slate-400">
-                Last Updated: {content.updatedAt}
-              </span>
+              <div className="flex items-center gap-2">
+                <Badge variant={content.status === 'published' ? 'success' : 'neutral'}>
+                  {content.status === 'published' ? 'Live on Portal' : 'Draft Mode'}
+                </Badge>
+                <span className="text-[11px] text-muted-foreground font-tabular">
+                  Last Updated: {content.updatedAt}
+                </span>
+              </div>
             </div>
 
             {/* Announcement bar preview */}
             {content.showAnnouncement && content.announcementBar && (
-              <div className="py-2 px-4 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-200 text-xs text-center font-medium">
+              <div className="py-2.5 px-4 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs text-center font-medium shadow-xs">
                 {content.announcementBar}
               </div>
             )}
 
             {/* Hero headline preview */}
             <div className="text-center py-6 sm:py-10 max-w-2xl mx-auto space-y-4">
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3.5xl font-extrabold text-foreground tracking-tight leading-tight">
                 {content.heroHeadline || 'Headline goes here'}
               </h1>
-              <p className="text-sm text-slate-300 leading-relaxed max-w-xl mx-auto">
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mx-auto">
                 {content.heroSubheadline || 'Subheadline description goes here...'}
               </p>
               <div className="pt-2">
-                <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-600 text-white font-medium text-sm shadow-md shadow-indigo-600/30">
+                <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm shadow-sm hover:bg-primary/95 transition-all">
                   {content.ctaText || 'Get Started'} &rarr;
                 </span>
               </div>
@@ -155,13 +169,13 @@ export default function HomepageContentPage() {
                     onChange={(e) =>
                       setContent({ ...content, showAnnouncement: e.target.checked })
                     }
-                    className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-950"
+                    className="h-4 w-4 rounded border-input text-primary focus:ring-primary/20"
                   />
                   <label
                     htmlFor="showAnnouncement"
-                    className="text-sm font-medium text-slate-200 cursor-pointer"
+                    className="text-sm font-medium text-foreground cursor-pointer"
                   >
-                    Enable announcement bar at the top of the website
+                    Enable announcement ticker bar at the top of the website
                   </label>
                 </div>
 
@@ -247,7 +261,7 @@ export default function HomepageContentPage() {
                 variant="primary"
                 size="lg"
                 isLoading={isSaving}
-                leftIcon={<Check className="h-4 w-4" />}
+                leftIcon={<HugeiconsIcon icon={CheckmarkCircle02Icon} size={16} />}
               >
                 Save Homepage Copy
               </Button>

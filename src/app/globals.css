@@ -2,38 +2,121 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #020617;
-  --foreground: #f8fafc;
+@layer base {
+  :root {
+    --background: 210 40% 98%; /* #F8FAFC */
+    --foreground: 222.2 84% 4.9%; /* #0F172A */
+
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 222.2 84% 4.9%; /* #0F172A */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 221.2 83.2% 47.8%; /* #1D4ED8 (Financial Blue) */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%; /* #F1F5F9 */
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%; /* #F1F5F9 */
+    --muted-foreground: 215.4 16.3% 46.9%; /* #64748B */
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 41.8%; /* #B91C1C */
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 142.1 70.6% 29.2%; /* #15803D */
+    --success-foreground: 210 40% 98%;
+
+    --warning: 37.7 89% 32.5%; /* #A16207 */
+    --warning-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%; /* #E2E8F0 */
+    --input: 214.3 31.8% 91.4%; /* #E2E8F0 */
+    --ring: 221.2 83.2% 47.8%; /* #1D4ED8 */
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 6.5%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 6.5%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 142.1 70.6% 35.3%;
+    --success-foreground: 210 40% 98%;
+
+    --warning: 37.7 89% 40%;
+    --warning-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.8 100% 47%;
+  }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  min-height: 100vh;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
 }
 
-/* Custom crisp dark scrollbar */
+/* Tabular figures for financial numbers */
+.num-tabular,
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Crisp professional scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb {
   background: #334155;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
