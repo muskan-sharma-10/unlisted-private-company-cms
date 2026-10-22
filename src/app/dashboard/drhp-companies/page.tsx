@@ -59,6 +59,7 @@ export default function DRHPCompaniesPage() {
   const [alertInfo, setAlertInfo] = useState<{ type: 'success' | 'error'; message: string } | null>(
     null
   );
+  const [modalError, setModalError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     companyName: '',
@@ -109,6 +110,7 @@ export default function DRHPCompaniesPage() {
       companyUrl: '',
     });
     setFormErrors({});
+    setModalError(null);
     setIsModalOpen(true);
   };
 
@@ -128,6 +130,7 @@ export default function DRHPCompaniesPage() {
       companyUrl: company.companyUrl || '',
     });
     setFormErrors({});
+    setModalError(null);
     setIsModalOpen(true);
   };
 
@@ -184,7 +187,12 @@ export default function DRHPCompaniesPage() {
     }
 
     setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+    if (Object.keys(errors).length > 0) {
+      setModalError('Please resolve the highlighted fields before saving.');
+      return false;
+    }
+    setModalError(null);
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -192,6 +200,7 @@ export default function DRHPCompaniesPage() {
     if (!validate()) return;
 
     setIsSubmitting(true);
+    setModalError(null);
     try {
       const urlCheck = validateCompanyUrl(formData.companyUrl);
       const normalizedCompanyUrl = formData.companyUrl.trim()
@@ -233,6 +242,7 @@ export default function DRHPCompaniesPage() {
       setIsModalOpen(false);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Database operation failed.';
+      setModalError(msg);
       setAlertInfo({ type: 'error', message: msg });
     } finally {
       setIsSubmitting(false);
@@ -375,6 +385,18 @@ export default function DRHPCompaniesPage() {
           </>
         }
       >
+        {modalError && (
+          <div className="mb-4">
+            <Alert
+              variant="error"
+              title="Validation or Database Error"
+              onClose={() => setModalError(null)}
+            >
+              {modalError}
+            </Alert>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             label="Company Name"

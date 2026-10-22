@@ -43,6 +43,7 @@ export default function UnlistedSharesPage() {
   const [alertInfo, setAlertInfo] = useState<{ type: 'success' | 'error'; message: string } | null>(
     null
   );
+  const [modalError, setModalError] = useState<string | null>(null);
 
   // Form State with complete evolved attributes
   const [formData, setFormData] = useState({
@@ -108,6 +109,7 @@ export default function UnlistedSharesPage() {
       drhpStatus: '',
     });
     setFormErrors({});
+    setModalError(null);
     setIsModalOpen(true);
   };
 
@@ -135,6 +137,7 @@ export default function UnlistedSharesPage() {
       drhpStatus: details.drhpStatus || '',
     });
     setFormErrors({});
+    setModalError(null);
     setIsModalOpen(true);
   };
 
@@ -174,16 +177,53 @@ export default function UnlistedSharesPage() {
 
   const validate = () => {
     const errors: Record<string, string> = {};
-    if (!formData.name.trim()) errors.name = 'Company name is required';
-    if (!formData.symbol.trim()) errors.symbol = 'Stock symbol is required';
-    if (!formData.sector.trim()) errors.sector = 'Sector/Industry is required';
+    const normName = formData.name.trim();
+    const normSymbol = formData.symbol.trim().toUpperCase();
+    const normSector = formData.sector.trim();
+    const normSlug = formData.slug ? formData.slug.trim().toLowerCase() : '';
+
+    if (!normName) errors.name = 'Company name is required';
+
+    if (!normSymbol) {
+      errors.symbol = 'Stock symbol is required';
+    } else {
+      // Validate uniqueness against existing shares
+      const duplicateShare = shares.find(
+        (s) => s.symbol.toUpperCase() === normSymbol && s.id !== editingShare?.id
+      );
+      if (duplicateShare) {
+        errors.symbol = `Symbol "${normSymbol}" is already in use by "${duplicateShare.name}". Stock symbols must be unique.`;
+      }
+    }
+
+    if (normSlug) {
+      const duplicateSlug = shares.find(
+        (s) => s.slug?.toLowerCase() === normSlug && s.id !== editingShare?.id
+      );
+      if (duplicateSlug) {
+        errors.slug = `URL slug "${normSlug}" is already taken by "${duplicateSlug.name}".`;
+      }
+    }
+
+    if (!normSector) errors.sector = 'Sector/Industry is required';
     if (!formData.currentPrice || isNaN(Number(formData.currentPrice)))
       errors.currentPrice = 'Valid share price is required';
     if (!formData.lotSize || isNaN(Number(formData.lotSize)))
       errors.lotSize = 'Valid lot size is required';
 
     setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+    if (Object.keys(errors).length > 0) {
+      if (errors.symbol) {
+        setModalError(errors.symbol);
+      } else if (errors.slug) {
+        setModalError(errors.slug);
+      } else {
+        setModalError('Please resolve the highlighted fields before saving.');
+      }
+      return false;
+    }
+    setModalError(null);
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -191,6 +231,7 @@ export default function UnlistedSharesPage() {
     if (!validate()) return;
 
     setIsSubmitting(true);
+    setModalError(null);
     try {
       const existingDetails = (editingShare?.details || {}) as Record<string, unknown>;
       const detailsPayload: Record<string, unknown> = {
@@ -252,8 +293,33 @@ export default function UnlistedSharesPage() {
 
       setIsModalOpen(false);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Database operation failed.';
-      setAlertInfo({ type: 'error', message: msg });
+      const rawMsg = err instanceof Error ? err.message : 'Database operation failed.';
+      let friendlyMsg = rawMsg;
+
+      if (
+        rawMsg.includes('unlisted_shares_symbol_key') ||
+        (rawMsg.includes('duplicate key') && rawMsg.includes('symbol'))
+      ) {
+        const sym = formData.symbol.trim().toUpperCase();
+        friendlyMsg = `Trading symbol "${sym}" is already registered. Each stock must have a unique symbol.`;
+        setFormErrors((prev) => ({
+          ...prev,
+          symbol: `Symbol "${sym}" is already taken. Please choose another symbol.`,
+        }));
+      } else if (
+        rawMsg.includes('slug') &&
+        (rawMsg.includes('duplicate key') || rawMsg.includes('unique constraint'))
+      ) {
+        const slg = formData.slug.trim().toLowerCase();
+        friendlyMsg = `URL slug "${slg}" is already registered. Please choose a unique custom slug.`;
+        setFormErrors((prev) => ({
+          ...prev,
+          slug: `Slug "${slg}" is already taken.`,
+        }));
+      }
+
+      setModalError(friendlyMsg);
+      setAlertInfo({ type: 'error', message: friendlyMsg });
     } finally {
       setIsSubmitting(false);
     }
@@ -409,13 +475,29 @@ export default function UnlistedSharesPage() {
           </>
         }
       >
+        {modalError && (
+          <div className="mb-4">
+            <Alert
+              variant="error"
+              title="Duplicate or Validation Error"
+              onClose={() => setModalError(null)}
+            >
+              {modalError}
+            </Alert>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Company Name"
               placeholder="e.g. Reliance Retail Ventures Ltd"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, name: e.target.value });
+                if (formErrors.name) setFormErrors((prev) => ({ ...prev, name: '' }));
+                if (modalError) setModalError(null);
+              }}
               error={formErrors.name}
               required
             />
@@ -424,8 +506,13 @@ export default function UnlistedSharesPage() {
               label="Trading Symbol / Ticker"
               placeholder="e.g. RELRETAIL"
               value={formData.symbol}
-              onChange={(e) => setFormData({ ...formData, symbol: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, symbol: e.target.value.toUpperCase() });
+                if (formErrors.symbol) setFormErrors((prev) => ({ ...prev, symbol: '' }));
+                if (modalError) setModalError(null);
+              }}
               error={formErrors.symbol}
+              helperText="Must be unique across all shares (e.g. TATA-TECH, RELRETAIL)."
               required
             />
           </div>
@@ -435,7 +522,10 @@ export default function UnlistedSharesPage() {
               label="Industry / Sector"
               placeholder="e.g. Consumer Goods, Fintech, Automotive"
               value={formData.sector}
-              onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, sector: e.target.value });
+                if (formErrors.sector) setFormErrors((prev) => ({ ...prev, sector: '' }));
+              }}
               error={formErrors.sector}
               required
             />
@@ -454,7 +544,10 @@ export default function UnlistedSharesPage() {
               type="number"
               placeholder="2850"
               value={formData.currentPrice}
-              onChange={(e) => setFormData({ ...formData, currentPrice: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, currentPrice: e.target.value });
+                if (formErrors.currentPrice) setFormErrors((prev) => ({ ...prev, currentPrice: '' }));
+              }}
               error={formErrors.currentPrice}
               required
             />
@@ -488,7 +581,10 @@ export default function UnlistedSharesPage() {
               type="number"
               placeholder="25"
               value={formData.lotSize}
-              onChange={(e) => setFormData({ ...formData, lotSize: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, lotSize: e.target.value });
+                if (formErrors.lotSize) setFormErrors((prev) => ({ ...prev, lotSize: '' }));
+              }}
               error={formErrors.lotSize}
               required
             />
@@ -516,8 +612,13 @@ export default function UnlistedSharesPage() {
               label="Custom URL Slug (Optional)"
               placeholder="e.g. reliance-retail-unlisted-shares"
               value={formData.slug}
-              onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-              helperText="Auto-generated if left blank."
+              onChange={(e) => {
+                setFormData({ ...formData, slug: e.target.value.toLowerCase() });
+                if (formErrors.slug) setFormErrors((prev) => ({ ...prev, slug: '' }));
+                if (modalError) setModalError(null);
+              }}
+              error={formErrors.slug}
+              helperText="Must be unique. Hyphen-separated lowercase (e.g. tata-tech)."
             />
 
             <Input

@@ -24,6 +24,45 @@ function getClient() {
   return client;
 }
 
+export function parseDatabaseError(
+  error: { message?: string; code?: string; details?: string },
+  context?: { entity?: string; symbol?: string; slug?: string; title?: string }
+): string {
+  if (!error) return 'An unexpected database error occurred.';
+  const msg = error.message || '';
+  const details = error.details || '';
+
+  // PostgreSQL 23505: Unique violation (e.g. unlisted_shares_symbol_key, idx_unlisted_shares_slug_unique, etc.)
+  if (error.code === '23505' || msg.includes('unique constraint') || msg.includes('duplicate key')) {
+    if (msg.includes('symbol') || details.includes('symbol') || msg.includes('unlisted_shares_symbol_key')) {
+      const sym = context?.symbol ? ` "${context.symbol.toUpperCase()}"` : '';
+      return `Trading symbol${sym} is already registered in the directory. Each stock must have a unique symbol.`;
+    }
+    if (msg.includes('slug') || details.includes('slug')) {
+      const slg = context?.slug ? ` "${context.slug.toLowerCase()}"` : '';
+      return `URL slug${slg} is already taken. Please choose a unique custom slug.`;
+    }
+    if (msg.includes('title') || details.includes('title')) {
+      const tit = context?.title ? ` "${context.title}"` : '';
+      return `A record with title${tit} already exists. Please use a unique title.`;
+    }
+    return `A record with these unique details already exists in the database. Please ensure unique values.`;
+  }
+
+  // PostgreSQL 23514: Check constraint violation
+  if (error.code === '23514' || msg.includes('violates check constraint')) {
+    if (msg.includes('slug_format')) {
+      return 'URL slug may only contain lowercase letters, numbers, and hyphens (e.g. company-name).';
+    }
+    if (msg.includes('change_type')) {
+      return 'Price change direction must be either "up" or "down".';
+    }
+    return 'One or more fields do not meet the database validation criteria.';
+  }
+
+  return msg || 'Database operation failed.';
+}
+
 // ==============================================================================
 // 1. UNLISTED SHARES CRUD
 // ==============================================================================
@@ -95,7 +134,13 @@ export async function createUnlistedShare(
 
   if (error) {
     console.error('[Supabase API] createUnlistedShare error:', error);
-    throw new Error(error.message || 'Failed to create unlisted share');
+    throw new Error(
+      parseDatabaseError(error, {
+        entity: 'unlisted share',
+        symbol: share.symbol,
+        slug: share.slug,
+      })
+    );
   }
 
   return {
@@ -152,7 +197,13 @@ export async function updateUnlistedShare(
 
   if (error) {
     console.error('[Supabase API] updateUnlistedShare error:', error);
-    throw new Error(error.message || 'Failed to update unlisted share');
+    throw new Error(
+      parseDatabaseError(error, {
+        entity: 'unlisted share',
+        symbol: share.symbol,
+        slug: share.slug,
+      })
+    );
   }
 
   return {
@@ -295,7 +346,13 @@ export async function createDRHPCompany(
 
   if (error) {
     console.error('[Supabase API] createDRHPCompany error:', error);
-    throw new Error(error.message || 'Failed to create DRHP company');
+    throw new Error(
+      parseDatabaseError(error, {
+        entity: 'DRHP company',
+        title: company.companyName,
+        slug: company.slug || undefined,
+      })
+    );
   }
 
   const finalUrl =
@@ -387,7 +444,13 @@ export async function updateDRHPCompany(
 
   if (error) {
     console.error('[Supabase API] updateDRHPCompany error:', error);
-    throw new Error(error.message || 'Failed to update DRHP company');
+    throw new Error(
+      parseDatabaseError(error, {
+        entity: 'DRHP company',
+        title: company.companyName,
+        slug: company.slug || undefined,
+      })
+    );
   }
 
   const finalUrl =
