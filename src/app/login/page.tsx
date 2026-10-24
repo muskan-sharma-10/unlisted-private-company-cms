@@ -20,13 +20,14 @@ import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 import { createClient } from '@/lib/supabase/client';
 import { getSupabaseConfig, formatAuthError } from '@/lib/supabase/config';
+import { sanitizeRedirectUrl } from '@/lib/supabase/auth';
 import { verifyAdminSessionAction } from './actions';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const redirectUrl = searchParams.get('redirect') || '/dashboard';
+  const redirectUrl = sanitizeRedirectUrl(searchParams.get('redirect'));
   const errorParam = searchParams.get('error');
 
   const [email, setEmail] = useState('');
@@ -44,6 +45,10 @@ function LoginForm() {
       );
     } else if (errorParam === 'session_expired') {
       setErrorMessage('Your session has expired. Please log in again.');
+    } else if (errorParam === 'config_error') {
+      setErrorMessage(
+        'Configuration Notice: The CMS authentication credentials are not configured or are invalid. Please verify your environment variables.'
+      );
     }
   }, [errorParam]);
 

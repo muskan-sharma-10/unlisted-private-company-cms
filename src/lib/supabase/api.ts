@@ -49,15 +49,23 @@ export function parseDatabaseError(
     return `A record with these unique details already exists in the database. Please ensure unique values.`;
   }
 
-  // PostgreSQL 23514: Check constraint violation
-  if (error.code === '23514' || msg.includes('violates check constraint')) {
-    if (msg.includes('slug_format')) {
-      return 'URL slug may only contain lowercase letters, numbers, and hyphens (e.g. company-name).';
-    }
-    if (msg.includes('change_type')) {
-      return 'Price change direction must be either "up" or "down".';
-    }
-    return 'One or more fields do not meet the database validation criteria.';
+  // PostgreSQL 42501: Insufficient privilege / Row Level Security policy violation
+  if (
+    error.code === '42501' ||
+    msg.includes('row-level security') ||
+    msg.includes('permission denied') ||
+    msg.includes('violates row-level security policy')
+  ) {
+    return 'Permission Denied: Your account does not have administrator privileges to modify this record. Ensure role="admin" is assigned in Supabase.';
+  }
+
+  // Session / JWT expiration
+  if (
+    msg.includes('JWT expired') ||
+    msg.includes('invalid JWT') ||
+    error.code === 'PGRST301'
+  ) {
+    return 'Session Expired: Your authenticated session has expired. Please refresh the page or log in again.';
   }
 
   return msg || 'Database operation failed.';

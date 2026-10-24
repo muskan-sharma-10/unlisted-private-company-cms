@@ -88,6 +88,103 @@ export function isUserAdmin(user: User | null | undefined): boolean {
   return isEmailAllowed;
 }
 
+export type AdminPrivilegeSource = 'app_metadata' | 'allowlist' | 'none';
+
+export interface AdminVerificationDetails {
+  isAdmin: boolean;
+  source: AdminPrivilegeSource;
+  error?: string;
+}
+
+/**
+ * Validates and sanitizes a redirect target URL to prevent Open Redirect vulnerabilities.
+ * Only permits relative local paths starting with a single '/' and rejects:
+ * - Protocol-relative URLs (e.g. '//evil.com')
+ * - Absolute external URLs (e.g. 'https://evil.com')
+ * - URI schemes (e.g. 'javascript:', 'data:')
+ * - Control characters / backslashes (e.g. '/\evil.com')
+ */
+export function sanitizeRedirectUrl(
+  url?: string | null,
+  fallback = '/dashboard'
+): string {
+  if (!url || typeof url !== 'string') return fallback;
+  const trimmed = url.trim();
+  if (!trimmed) return fallback;
+
+  // Must start with exactly one forward slash, followed by a non-slash character or nothing
+  // and must NOT contain backslashes or protocol schemes
+  if (
+    trimmed.startsWith('/') &&
+    !trimmed.startsWith('//') &&
+    !trimmed.includes('\\') &&
+    !trimmed.toLowerCase().includes('javascript:') &&
+    !trimmed.toLowerCase().includes('data:') &&
+    !trimmed.includes('://')
+  ) {
+    return trimmed;
+  }
+
+  return fallback;
+}
+
+/**
+ * Authoritative server-side admin privilege verification.
+ * Evaluates:
+ * 1. Tamper-proof app_metadata claims (role='admin' | 'superadmin' | is_admin=true)
+ * 2. Server-side ADMIN_EMAILS environment variable allowlist
+ * 3. PostgreSQL admin_users table lookup via authenticated Supabase client
+ */
+export async function verifyUserAdminServer(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any | null,
+  user: User | null | undefined
+): Promise<AdminVerificationDetails> {
+  if (!user) {
+    return { isAdmin: false, source: 'none', error: 'No user session provided' };
+  }
+
+  // 1. App metadata verification (tamper-proof)
+  const appRole = user.app_metadata?.role;
+  const appIsAdmin = user.app_metadata?.is_admin;
+  if (
+    appRole === 'admin' ||
+    appRole === 'superadmin' ||
+    appIsAdmin === true
+  ) {
+    return { isAdmin: true, source: 'app_metadata' };
+  }
+
+  // 2. Server-side environment allowlist verification
+  if (isUserAdmin(user)) {
+    return { isAdmin: true, source: 'allowlist' };
+  }
+
+  // 3. PostgreSQL admin_users database table lookup
+  if (supabase) {
+    try {
+      const userEmail = user.email ? user.email.trim().toLowerCase() : '';
+      const filterConditions = userEmail
+        ? `user_id.eq.${user.id},email.ilike.${userEmail}`
+        : `user_id.eq.${user.id}`;
+
+      const { data: dbAdmin, error } = await supabase
+        .from('admin_users')
+        .select('id')
+        .or(filterConditions)
+        .maybeSingle();
+
+      if (!error && dbAdmin) {
+        return { isAdmin: true, source: 'allowlist' };
+      }
+    } catch (err) {
+      console.error('[Admin Auth] Error checking admin_users table:', err);
+    }
+  }
+
+  return { isAdmin: false, source: 'none' };
+}
+
 /**
  * Returns a friendly display name for the authenticated user.
  */

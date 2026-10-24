@@ -64,14 +64,19 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
     // Listen to auth state transitions
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+      // Multi-tab logout synchronization: If user logged out in another tab, redirect to /login
+      if (event === 'SIGNED_OUT') {
+        router.push('/login');
+        router.refresh();
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [router]);
 
   const navItems: NavGroup[] = [
     {
@@ -160,7 +165,10 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
         await supabase.auth.signOut();
       }
       // Also invoke server signout endpoint to guarantee cookie synchronization
-      await fetch('/auth/signout', { method: 'POST' }).catch(() => {});
+      await fetch('/auth/signout', {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+      }).catch(() => {});
     } catch (err) {
       console.error('Logout error:', err);
     } finally {

@@ -1,8 +1,10 @@
 import React from 'react';
 import { redirect } from 'next/navigation';
 import { DashboardShell } from '@/components/layout/DashboardShell';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
-import { isUserAdmin } from '@/lib/supabase/auth';
+import { getAuthenticatedAdminSession } from '@/lib/supabase/server';
+import { getSupabaseConfig } from '@/lib/supabase/config';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Dashboard | Unlisted CMS',
@@ -14,40 +16,22 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createServerSupabaseClient();
+  const { isValid } = getSupabaseConfig();
+  const isProduction = process.env.NODE_ENV === 'production';
 
-  // If Supabase is configured, enforce server-side session and admin validation (Defense-in-Depth)
-  if (supabase) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  // In production or whenever Supabase is configured, enforce authoritative server session & admin checks (Defense-in-Depth)
+  if (isValid || isProduction) {
+    const session = await getAuthenticatedAdminSession();
 
-    if (!user) {
+    if (!session.user) {
       redirect('/login');
     }
 
-    let isAdmin = isUserAdmin(user);
-    if (!isAdmin) {
-      const userEmail = user.email ? user.email.trim().toLowerCase() : '';
-      const filterConditions = userEmail
-        ? `user_id.eq.${user.id},email.ilike.${userEmail}`
-        : `user_id.eq.${user.id}`;
-
-      const { data: dbAdmin } = await supabase
-        .from('admin_users')
-        .select('id')
-        .or(filterConditions)
-        .maybeSingle();
-
-      if (dbAdmin) {
-        isAdmin = true;
-      }
-    }
-
-    if (!isAdmin) {
+    if (!session.isAdmin) {
       redirect('/login?error=unauthorized');
     }
   }
 
   return <DashboardShell>{children}</DashboardShell>;
 }
+
