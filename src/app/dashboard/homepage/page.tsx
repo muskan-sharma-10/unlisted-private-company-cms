@@ -75,7 +75,7 @@ export default function HomepageContentPage() {
 
         <div className="flex items-center gap-3">
           <a
-            href="https://unlisted-private-company.vercel.app/"
+            href="https://www.unlistedpond.com/"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-border bg-card text-xs font-medium text-foreground hover:bg-muted/80 hover:border-slate-300 shadow-xs transition-colors"

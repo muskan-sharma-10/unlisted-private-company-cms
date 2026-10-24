@@ -64,7 +64,7 @@ function LoginForm() {
       if (!config.isValid) {
         setErrorMessage(
           config.error ||
-            'Supabase credentials are not configured. Please check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY in your .env.local file.'
+          'Supabase credentials are not configured. Please check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY in your .env.local file.'
         );
         setIsLoading(false);
         return;
@@ -106,7 +106,7 @@ function LoginForm() {
         await supabase.auth.signOut();
         setErrorMessage(
           adminVerification?.error ||
-            'Access Denied: Your account is authenticated, but does not have administrator privileges. Only users with role="admin" in app_metadata or listed in ADMIN_EMAILS can access the CMS.'
+          'Access Denied: Your account is authenticated, but does not have administrator privileges. Only users with role="admin" in app_metadata or listed in ADMIN_EMAILS can access the CMS.'
         );
         setIsLoading(false);
         return;
@@ -139,19 +139,7 @@ function LoginForm() {
         </p>
       </div>
 
-      {/* Security notice: Invite-Only & No Public Signup */}
-      <div className="p-3.5 bg-blue-50/70 border border-blue-200/60 rounded-xl flex items-start gap-3 text-xs text-blue-950">
-        <HugeiconsIcon icon={Alert02Icon} size={16} className="text-primary shrink-0 mt-0.5" />
-        <div>
-          <strong className="text-blue-950 block font-semibold">
-            Invite-Only Administrator Access
-          </strong>
-          <span className="text-blue-800 leading-relaxed">
-            Public signups are strictly disabled. Only administrators created in
-            Supabase Auth with verified admin privileges can access this panel.
-          </span>
-        </div>
-      </div>
+
 
       {/* Login Card */}
       <div className="bg-card border border-border rounded-xl p-6 sm:p-8 shadow-sm space-y-5">
@@ -169,7 +157,7 @@ function LoginForm() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Admin Email"
+            label="Email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -183,7 +171,7 @@ function LoginForm() {
           <div className="space-y-1">
             <div className="relative">
               <Input
-                label="Admin Password"
+                label="Password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -217,72 +205,13 @@ function LoginForm() {
             isLoading={isLoading}
             rightIcon={<HugeiconsIcon icon={ArrowRight01Icon} size={16} />}
           >
-            Sign In to Dashboard
+            Sign In
           </Button>
         </form>
 
-        {/* Collapsible Supabase Admin User Guide */}
-        <div className="pt-3 border-t border-border">
-          <button
-            type="button"
-            onClick={() => setShowHelpGuide(!showHelpGuide)}
-            className="w-full flex items-center justify-between text-xs text-primary hover:text-primary/80 font-medium py-1 transition-colors"
-          >
-            <span className="flex items-center gap-1.5">
-              <HugeiconsIcon icon={HelpCircleIcon} size={15} />
-              How to configure your admin account in Supabase
-            </span>
-            {showHelpGuide ? (
-              <HugeiconsIcon icon={ArrowUp01Icon} size={15} />
-            ) : (
-              <HugeiconsIcon icon={ArrowDown01Icon} size={15} />
-            )}
-          </button>
-
-          {showHelpGuide && (
-            <div className="mt-2.5 p-3.5 rounded-lg bg-muted/40 border border-border text-[11px] text-foreground space-y-2 leading-relaxed">
-              <p className="font-semibold text-foreground">
-                Quick Setup Steps:
-              </p>
-              <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                <li>
-                  Open your <strong className="text-foreground">Supabase Dashboard</strong> &rarr; <strong className="text-foreground">Authentication</strong> &rarr; <strong className="text-foreground">Users</strong>.
-                </li>
-                <li>
-                  Click <strong className="text-foreground">Add user</strong> &rarr; <strong className="text-foreground">Create user</strong> with your email & password.
-                </li>
-                <li>
-                  Add your email to{' '}
-                  <code className="text-primary bg-primary/10 px-1 py-0.5 rounded font-mono font-medium">
-                    ADMIN_EMAILS
-                  </code>{' '}
-                  in <code className="text-foreground font-semibold">.env.local</code>.
-                </li>
-                <li>
-                  Or set <code className="text-primary bg-primary/10 px-1 py-0.5 rounded font-mono font-medium">{`{"role": "admin"}`}</code> in <strong className="text-foreground">app_metadata</strong> via the Supabase SQL Editor.
-                </li>
-              </ol>
-              <div className="flex items-center gap-1.5 text-emerald-700 pt-1 font-medium">
-                <HugeiconsIcon icon={SecurityCheckIcon} size={14} />
-                <span>Non-admin accounts are automatically blocked.</span>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
 
-      {/* Target site footer */}
-      <p className="text-center text-xs text-muted-foreground">
-        Connected Website:{' '}
-        <a
-          href="https://unlisted-private-company.vercel.app/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-foreground underline underline-offset-2 hover:text-primary transition-colors"
-        >
-          unlisted-private-company.vercel.app
-        </a>
-      </p>
+
     </div>
   );
 }

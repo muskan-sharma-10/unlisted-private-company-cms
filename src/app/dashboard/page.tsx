@@ -75,7 +75,7 @@ export default function DashboardOverviewPage() {
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
               Real-time administration for unlisted equity records, DRHP IPO filings, equity research notes, and live homepage content for{' '}
               <a
-                href="https://unlisted-private-company.vercel.app/"
+                href="https://www.unlistedpond.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary font-medium hover:underline inline-flex items-center gap-0.5"

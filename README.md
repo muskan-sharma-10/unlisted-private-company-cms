@@ -1,6 +1,6 @@
 # 🚀 Unlisted CMS — Standalone Admin Portal
 
-A standalone, secure Content Management System (CMS) and Admin Panel built for **[unlisted-private-company.vercel.app](https://unlisted-private-company.vercel.app/)**.
+A standalone, secure Content Management System (CMS) and Admin Panel built for **[unlisted-private-company.vercel.app](https://www.unlistedpond.com/)**.
 
 Built with **Next.js 14 App Router**, **TypeScript**, **Tailwind CSS**, and **Supabase Authentication & PostgreSQL**.
 
@@ -60,8 +60,8 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 
 # Existing public website API endpoint
-NEXT_PUBLIC_MAIN_WEBSITE_URL=https://unlisted-private-company.vercel.app
-NEXT_PUBLIC_API_BASE_URL=https://unlisted-private-company.vercel.app/api/admin
+NEXT_PUBLIC_MAIN_WEBSITE_URL=https://www.unlistedpond.com
+NEXT_PUBLIC_API_BASE_URL=https://www.unlistedpond.com/api/admin
 ```
 
 > ⚠️ **Important Security Rule:**
@@ -221,7 +221,7 @@ CREATE POLICY "Admins full access homepage" ON public.homepage_content
 
 ## 🔐 Cross-Domain API Architecture & Authentication Strategy
 
-Since the CMS runs on its own domain (e.g., `cms.unlistedprivatecompany.com` or `unlisted-cms.vercel.app`) and the existing public site owns the API routes (`https://unlisted-private-company.vercel.app/api/admin/*`), here is the standard, secure token-based architecture:
+Since the CMS runs on its own domain (e.g., `cms.unlistedprivatecompany.com` or `unlisted-cms.vercel.app`) and the existing public site owns the API routes (`https://www.unlistedpond.com/api/admin/*`), here is the standard, secure token-based architecture:
 
 ```
 ┌─────────────────────────────────┐                 ┌─────────────────────────────────┐

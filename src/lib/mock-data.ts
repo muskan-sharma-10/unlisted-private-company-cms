@@ -252,7 +252,7 @@ export const initialSettings: WebsiteSettings = {
   supportPhone: '+91 98200 12345',
   officeAddress: 'Bandra-Kurla Complex (BKC), Mumbai, Maharashtra 400051',
   whatsappNumber: '+91 98200 12345',
-  apiBaseUrl: 'https://unlisted-private-company.vercel.app/api/admin',
+  apiBaseUrl: 'https://www.unlistedpond.com/api/admin',
   maintenanceMode: false,
 };
 

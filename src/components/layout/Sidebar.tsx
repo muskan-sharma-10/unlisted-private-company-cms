@@ -168,7 +168,7 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
       await fetch('/auth/signout', {
         method: 'POST',
         headers: { Accept: 'application/json' },
-      }).catch(() => {});
+      }).catch(() => { });
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
@@ -228,7 +228,7 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
         {/* Live Public Website Indicator */}
         <div className="px-3.5 py-2.5 bg-muted/40 border-b border-border/60">
           <a
-            href="https://unlisted-private-company.vercel.app/"
+            href="https://unlistedpond.com/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-between px-2.5 py-1.5 rounded-md bg-background hover:bg-muted/80 border border-border text-[11px] font-medium text-foreground transition-colors group shadow-2xs"

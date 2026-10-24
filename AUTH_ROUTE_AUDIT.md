@@ -5,7 +5,7 @@
 **Auditor:** Senior Next.js 14 & Supabase Security Architect  
 **Target Repository:** `d:/Privatecompany/unlisted-cms`  
 **Companion Portal:** `d:/Privatecompany/unlisted - portal`  
-**Live Target Website:** [https://unlisted-private-company.vercel.app](https://unlisted-private-company.vercel.app)  
+**Live Target Website:** [https://www.unlistedpond.com](https://www.unlistedpond.com)  
 **Verification Baseline:** ✅ **TypeScript Compile Clean (`tsc --noEmit`), Production Build Green (`next build` 17/17 pages)**
 
 ---

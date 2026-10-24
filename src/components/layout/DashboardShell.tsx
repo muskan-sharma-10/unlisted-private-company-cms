@@ -24,7 +24,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </main>
 
         <footer className="px-6 py-4 border-t border-border text-center text-xs text-muted-foreground bg-card/30">
-          Unlisted CMS &bull; Financial Research & Publishing Engine &bull; Next.js 14 App Router &amp; Supabase
+          Unlisted CMS &bull; Financial Research & Publishing Engine
         </footer>
       </div>
     </div>

@@ -137,13 +137,7 @@ export default function SettingsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
           <div className="p-3.5 rounded-lg bg-muted/40 border border-border space-y-1">
-            <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
-              <HugeiconsIcon icon={Globe02Icon} size={15} className="text-primary" />
-              <span>Target Website</span>
-            </div>
-            <p className="text-foreground font-semibold truncate">
-              unlisted-private-company.vercel.app
-            </p>
+
           </div>
 
           <div className="p-3.5 rounded-lg bg-muted/40 border border-border space-y-1">

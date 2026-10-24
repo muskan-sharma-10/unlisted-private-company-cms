@@ -108,7 +108,7 @@ VALUES
     '+91 98200 12345',
     'Bandra-Kurla Complex (BKC), Mumbai, Maharashtra 400051',
     '+91 98200 12345',
-    'https://unlisted-private-company.vercel.app/api/admin',
+    'https://www.unlistedpond.com/api/admin',
     false
   )
 ON CONFLICT (id) DO UPDATE SET

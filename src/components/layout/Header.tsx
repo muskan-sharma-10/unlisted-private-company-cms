@@ -48,37 +48,12 @@ export function Header({ onOpenMobile }: HeaderProps) {
             {getPageTitle(pathname)}
           </h1>
           <p className="text-[11px] text-muted-foreground hidden sm:block">
-            Administrative Control Panel &middot; Target:{' '}
-            <span className="font-mono text-foreground/80">unlisted-private-company.vercel.app</span>
+            Administrative Control Panel
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5">
-        {/* Environment / Security Badge */}
-        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-mono font-medium">
-          <HugeiconsIcon icon={Shield01Icon} size={14} className="shrink-0" />
-          <span>Standalone CMS</span>
-        </div>
 
-        {/* Database Status indicator */}
-        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted border border-border text-foreground text-xs font-medium">
-          <HugeiconsIcon icon={DatabaseIcon} size={14} className="text-emerald-700 dark:text-emerald-400 shrink-0" />
-          <span className="text-[11px]">Supabase Connected</span>
-        </div>
-
-        {/* Link to live public site */}
-        <a
-          href="https://unlisted-private-company.vercel.app/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-muted text-xs font-medium text-foreground transition-colors shadow-2xs"
-          title="Open live public portal in new tab"
-        >
-          <span>Live Site</span>
-          <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="text-muted-foreground" />
-        </a>
-      </div>
     </header>
   );
 }
